@@ -1,11 +1,20 @@
-import React from 'react'
+import React from "react";
+import Footer from "../_components/Footer";
+import Sidebar from "./_components/Sidebar";
 
 const Dashboard = () => {
   return (
-    <div>
-      Dashboard
+    <div className="flex">
+      <Sidebar />
+      <section>
+        <main>
+          <div></div>
+          <div></div>
+        </main>
+        {/* <Footer /> */}
+      </section>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;
