@@ -10,6 +10,12 @@ import {
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Footer from "@/app/_components/Footer";
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const WellnessPlan = () => {
   const [step, setStep] = useState(1);
@@ -17,123 +23,62 @@ const WellnessPlan = () => {
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  const [waistline, setWaistLine] = useState("");
+  const [bmi, setBmi] = useState(null);
+  const [bmiCategory, setBmiCategory] = useState("");
+  const router = useRouter();
+  const path = usePathname();
 
-  const [selectedMedicalConditions, setSelectedMedicalConditions] = useState(
-    []
-  );
-  const [selectedLifestyle, setSelectedLifestyle] = useState([]);
-  const [selectedDiet, setSelectedDiet] = useState([]);
-  const [selectedFamilyHistory, setSelectedFamilyHistory] = useState([]);
-  const [speciallyAbled, setSpeciallyAbled] = useState("");
+  const email = path.split("/")[2];
 
-  const medicalConditions = [
-    "Heart Disease",
-    "Diabetes",
-    "Hypertension",
-    "Asthma",
-    "Allergies",
-    "Chronic Pain",
-    "Arthritis",
-    "Depression",
-    "Anxiety",
-    "None",
-    "Migraine",
-    "Thyroid Disorder",
-    "NA",
-  ];
-
-  const lifestyleOptions = [
-    "Active",
-    "Sedentary",
-    "Balanced",
-    "Stressed",
-    "Healthy",
-    "Busy",
-    "Relaxed",
-    "Moderate Exercise",
-    "High-Intensity Exercise",
-    "Workaholic",
-  ];
-
-  const dietOptions = [
-    "Balanced Diet",
-    "High-Protein",
-    "Vegetarian",
-    "Vegan",
-    "Keto",
-    "Low-Carb",
-    "High-Carb",
-    "Intermittent Fasting",
-    "Junk Food",
-    "Organic Only",
-    "Gluten-Free",
-    "Pescatarian",
-    "Low-Sugar",
-    "Fast Food Regular",
-    "Mixed Diet",
-  ];
-
-  const familyHistoryOptions = [
-    "Heart Disease",
-    "Diabetes",
-    "Cancer",
-    "Hypertension",
-    "Alzheimer's Disease",
-    "Stroke",
-    "Mental Illness",
-    "Autoimmune Disorder",
-    "Genetic Disorder",
-    "None",
-    "Asthma",
-    "Arthritis",
-    "Blood Disorders",
-    "Obesity",
-    "Kidney Disease",
-    "Osteoporosis",
-    "Thyroid Disorder",
-  ];
-
-  const speciallyAbledOptions = ["Yes", "No", "Partial", "Prefer not to say"];
-
-  const handleNext = () => {
-    setStep((prevStep) => prevStep + 1);
-  };
-
-  const handleBack = () => {
-    setStep((prevStep) => prevStep - 1);
-  };
-
-  const toggleSelection = (item, state, setState) => {
-    setState((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+  const calculateBMI = () => {
+    const heightInMeters = height / 100;
+    const calculatedBmi = (weight / (heightInMeters * heightInMeters)).toFixed(
+      1
     );
+    setBmi(calculatedBmi);
+    determineBmiCategory(calculatedBmi);
+    setStep(2);
   };
 
-  const showResult = () => {
-    alert(
-      `Sex: ${selectedSex}, Age: ${age}, Weight: ${weight}, Height: ${height}, 
-      Diet: ${selectedDiet.join(
-        ", "
-      )}, Family History: ${selectedFamilyHistory.join(", ")}, 
-      Lifestyle: ${selectedLifestyle.join(
-        ", "
-      )}, Medical Conditions: ${selectedMedicalConditions.join(", ")}, 
-      Specially Abled: ${speciallyAbled}`
-    );
+  const determineBmiCategory = (bmi) => {
+    if (bmi < 18.5) {
+      setBmiCategory("Underweight");
+    } else if (bmi >= 18.5 && bmi < 24.9) {
+      setBmiCategory("Normal");
+    } else if (bmi >= 25 && bmi < 29.9) {
+      setBmiCategory("Overweight");
+    } else {
+      setBmiCategory("Obese");
+    }
   };
 
-  const checkDisabled = () => {
-    return (
-      age &&
-      weight &&
-      height &&
-      selectedSex &&
-      speciallyAbled &&
-      selectedDiet.length > 0 &&
-      selectedFamilyHistory.length > 0 &&
-      selectedLifestyle.length > 0 &&
-      selectedMedicalConditions.length > 0
-    );
+  const pieChartData = {
+    labels: ["Underweight", "Normal", "Overweight", "Obese"],
+    datasets: [
+      {
+        data: [
+          bmiCategory === "Underweight" ? 1 : 0,
+          bmiCategory === "Normal" ? 1 : 0,
+          bmiCategory === "Overweight" ? 1 : 0,
+          bmiCategory === "Obese" ? 1 : 0,
+        ],
+        backgroundColor: ["#36A2EB", "#4BC0C0", "#FFCE56", "#FF6384"],
+        hoverBackgroundColor: ["#36A2EB", "#4BC0C0", "#FFCE56", "#FF6384"],
+      },
+    ],
+  };
+
+  const pieChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "bottom",
+      },
+      tooltip: {
+        enabled: true,
+      },
+    },
   };
 
   return (
@@ -193,171 +138,50 @@ const WellnessPlan = () => {
                 />
               </div>
 
-              <div className="flex justify-end mt-6">
-                <Button onClick={() => setStep(2)}>Next</Button>
+              <div className="mb-4">
+                <Input
+                  className="bg-white w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="Waistline (cm)"
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWaistLine(e.target.value)}
+                  min="10"
+                  max="220"
+                />
+              </div>
+
+              <div className="flex justify-center mt-6">
+                <Button onClick={calculateBMI}>Submit</Button>
               </div>
             </>
           )}
 
           {step === 2 && (
             <>
-              <h2 className="mb-6 text-2xl font-semibold text-center">
-                Additional Information
+              <h2 className="text-2xl font-semibold text-center mb-6">
+                Your BMI Report
               </h2>
-
-              {/* Buttons for Medical Conditions */}
-              <div className="mb-4">
-                <label className="block mb-2 text-md font-medium text-gray-700">
-                  Any existing medical conditions?
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {medicalConditions.map((condition, index) => (
-                    <Button
-                      key={index}
-                      className={`w-full text-left px-4 py-2 border rounded-xl ${
-                        selectedMedicalConditions.includes(condition)
-                          ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
-                          : "bg-white border-gray-300 text-black hover:bg-white hover:text-black"
-                      }`}
-                      onClick={() =>
-                        toggleSelection(
-                          condition,
-                          selectedMedicalConditions,
-                          setSelectedMedicalConditions
-                        )
-                      }
-                    >
-                      {condition}
-                    </Button>
-                  ))}
-                </div>
+              <div className="text-center mb-4">
+                <p>
+                  Your BMI: <strong>{bmi}</strong>
+                </p>
+                <p>
+                  Category: <strong>{bmiCategory}</strong>
+                </p>
               </div>
-
-              <div className="flex justify-between mt-6">
-                <Button onClick={() => handleBack()}>Back</Button>
-                <Button onClick={() => handleNext()}>Next</Button>
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
-              <h2 className="mb-6 text-2xl font-semibold text-center">
-                Describe your lifestyle in a few lines.
-              </h2>
-              <div className="grid grid-cols-2 gap-2">
-                {lifestyleOptions.map((option, index) => (
+              <Pie data={pieChartData} options={pieChartOptions} />{" "}
+              <div className="flex justify-center mt-6">
+                {bmiCategory !== "Normal" ? (
                   <Button
-                    key={index}
-                    className={`w-full text-left px-4 py-2 border rounded-xl ${
-                      selectedLifestyle.includes(option)
-                        ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
-                        : "bg-white border-gray-300 text-black hover:bg-white hover:text-black"
-                    }`}
                     onClick={() =>
-                      toggleSelection(
-                        option,
-                        selectedLifestyle,
-                        setSelectedLifestyle
-                      )
+                      router.replace(`/dashboard/${email}/personalisedplan`)
                     }
                   >
-                    {option}
+                    Get Prescription
                   </Button>
-                ))}
-              </div>
-              <div className="flex justify-between mt-6">
-                <Button onClick={() => handleBack()}>Back</Button>
-                <Button onClick={() => handleNext()}>Next</Button>
-              </div>
-            </>
-          )}
-
-          {step === 4 && (
-            <>
-              <h2 className="mb-6 text-2xl font-semibold text-center">
-                Describe your current diet.
-              </h2>
-              <div className="grid grid-cols-2 gap-2">
-                {dietOptions.map((option, index) => (
-                  <Button
-                    key={index}
-                    className={`w-full text-left px-4 py-2 border rounded-xl ${
-                      selectedDiet.includes(option)
-                        ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
-                        : "bg-white border-gray-300 text-black hover:bg-white hover:text-black"
-                    }`}
-                    onClick={() =>
-                      toggleSelection(option, selectedDiet, setSelectedDiet)
-                    }
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </div>
-              <div className="flex justify-between mt-6">
-                <Button onClick={() => handleBack()}>Back</Button>
-                <Button onClick={() => handleNext()}>Next</Button>
-              </div>
-            </>
-          )}
-
-          {step === 5 && (
-            <>
-              <h2 className="mb-6 text-2xl font-semibold text-center">
-                Any family history of medical conditions?
-              </h2>
-              <div className="grid grid-cols-2 gap-2">
-                {familyHistoryOptions.map((option, index) => (
-                  <Button
-                    key={index}
-                    className={`w-full text-left px-4 py-2 border rounded-xl ${
-                      selectedFamilyHistory.includes(option)
-                        ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
-                        : "bg-white border-gray-300 text-black hover:bg-white hover:text-black"
-                    }`}
-                    onClick={() =>
-                      toggleSelection(
-                        option,
-                        selectedFamilyHistory,
-                        setSelectedFamilyHistory
-                      )
-                    }
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </div>
-              <div className="flex justify-between mt-6">
-                <Button onClick={() => handleBack()}>Back</Button>
-                <Button onClick={() => handleNext()}>Next</Button>
-              </div>
-            </>
-          )}
-
-          {step === 6 && (
-            <>
-              <h2 className="mb-6 text-2xl font-semibold text-center">
-                Do you come under the specially abled category?
-              </h2>
-              <div className="flex flex-col gap-2">
-                {speciallyAbledOptions.map((option, index) => (
-                  <Button
-                    key={index}
-                    className={`w-full text-left px-4 py-2 border rounded-xl ${
-                      speciallyAbled === option
-                        ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
-                        : "bg-white border-gray-300 text-black hover:bg-white hover:text-black"
-                    }`}
-                    onClick={() => setSpeciallyAbled(option)}
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </div>
-              <div className="flex justify-between mt-6">
-                <Button onClick={() => handleBack()}>Back</Button>
-                <Button onClick={showResult}>Submit</Button>
+                ) : (
+                  ""
+                )}
               </div>
             </>
           )}
