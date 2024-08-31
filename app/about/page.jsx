@@ -2,6 +2,7 @@ import Image from "next/image";
 import React from "react";
 import Navbar from "../_components/Navbar";
 import { Dot } from "lucide-react";
+import Footer from "../_components/Footer";
 
 const feat = [
   "Community Challenges and Local Fitness Ecosystem",
@@ -46,6 +47,7 @@ const About = () => {
           className="absolute -left-5 top-28 rounded-xl"
         />
       </div>
+      <Footer />
     </>
   );
 };

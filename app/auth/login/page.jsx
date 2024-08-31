@@ -1,4 +1,5 @@
 "use client"
+import Footer from "@/app/_components/Footer";
 import Navbar from "@/app/_components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ const Login = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 };
