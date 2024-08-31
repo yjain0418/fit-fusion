@@ -64,7 +64,7 @@ export default function ImageSlider() {
   };
 
   return (
-    <div className="relative w-full mx-auto mt-4">
+    <div className="relative w-full mx-auto mt-12">
       <div
         className="relative h-[460px] mx-12 group hover:-translate-y-2"
         onMouseOver={handleMouseOver}
