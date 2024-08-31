@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from 'react';
+import { useState } from 'react';
 import React from "react";
 
 const Login = () => {
@@ -29,11 +30,10 @@ const Login = () => {
 
         if (result.success) {
           alert("Login success");
-          router.push("/dashboard");
+          router.replace(`/dashboard/${email}`);
         } else {
           alert("Login failed");
         }
-
         
       }catch(error) {
         console.log("Login failed");
