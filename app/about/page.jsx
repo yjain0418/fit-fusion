@@ -15,7 +15,7 @@ const About = () => {
   return (
     <>
       <Navbar />
-      <div className="container relative py-14 flex w-full h-full">
+      <div className="container relative py-16 flex w-full h-full">
         <div className="intro relative left-[25%] bg-slate-200 w-[80%] h-[72vh] px-20 py-10 rounded-xl">
           <h1 className="text-6xl font-bold absolute right-40 uppercase">
             About Us
@@ -31,7 +31,7 @@ const About = () => {
             </h3>
 
             {feat.map((item, index) => (
-              <p key={index} className="flex gap-3 items-center text-lg mt-4">
+              <p key={index} className="flex gap-1 items-center text-lg mt-2">
                 <Dot size={32} />
                 {item}
               </p>
