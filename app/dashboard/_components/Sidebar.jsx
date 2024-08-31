@@ -45,6 +45,10 @@ const Sidebar = () => {
         })}
       </div>
 
+      <div className="justify-center items-center px-8 py-3 mb-3">
+        <Button onClick={()=> router.push(`/dashboard/${email}/wellnessplan`)}>Get Customised Plan</Button>
+      </div>
+
       <hr />
 
       <div className="flex justify-start px-12 mt-6 font-thin gap-6 text-black text-center text-xl cursor-pointer">
