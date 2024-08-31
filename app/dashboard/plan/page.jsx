@@ -1,8 +1,11 @@
 import React from 'react'
+import Sidebar from '../_components/Sidebar'
 
 const DietPlan = () => {
   return (
-    <div>DietPlan</div>
+    <div>
+      <Sidebar />
+      DietPlan</div>
   )
 }
 

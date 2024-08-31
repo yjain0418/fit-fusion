@@ -16,7 +16,7 @@ const Sidebar = () => {
   const [selectedState, setSelectedState] = useState("");
 
   return (
-    <div className="flex flex-col border-r-zinc-900 border-r-[0.2px] py-10 h-screen rounded-r-2xl">
+    <div className="flex w-1/4 flex-col border-r-zinc-900 border-r-[0.2px] py-10 h-screen rounded-r-2xl">
       <Image
         src={"/logo.png"}
         alt="logo"
