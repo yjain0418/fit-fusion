@@ -1,6 +1,5 @@
 import React from "react";
-import Footer from "../_components/Footer";
-import Sidebar from "./_components/Sidebar";
+import Sidebar from "../_components/Sidebar";
 
 const Dashboard = () => {
   return (
@@ -18,4 +17,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
