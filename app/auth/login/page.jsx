@@ -29,11 +29,10 @@ const Login = () => {
 
         if (result.success) {
           alert("Login success");
-          router.push("/dashboard");
+          router.replace(`/dashboard/${email}`);
         } else {
           alert("Login failed");
         }
-
         
       }catch(error) {
         console.log("Login failed");
