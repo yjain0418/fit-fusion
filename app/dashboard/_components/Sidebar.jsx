@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
