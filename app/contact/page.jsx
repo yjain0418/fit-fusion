@@ -3,6 +3,7 @@ import Navbar from "../_components/Navbar";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Footer from "../_components/Footer";
 
 const Contact = () => {
   return (
@@ -20,6 +21,7 @@ const Contact = () => {
           <Image src={"/contact.jpg"} alt="" width={500} height={500} />
         </div>
       </div>
+      <Footer />
     </>
   );
 };
