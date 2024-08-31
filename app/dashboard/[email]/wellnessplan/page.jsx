@@ -187,7 +187,6 @@ const WellnessPlan = () => {
           )}
         </div>
       </div>
-
       <Footer />
     </>
   );
