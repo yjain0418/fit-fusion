@@ -1,10 +1,10 @@
 import React from "react";
-import Footer from "../_components/Footer";
-import Sidebar from "./_components/Sidebar";
+import Sidebar from "../../_components/Sidebar";
 
-const Dashboard = () => {
+const Workout = () => {
   return (
-    <div className="flex">
+    <>
+    <div className='flex'>
       <Sidebar />
       <section>
         <main>
@@ -13,8 +13,10 @@ const Dashboard = () => {
         </main>
         {/* <Footer /> */}
       </section>
+
     </div>
-  );
+    </>
+  )
 };
 
-export default Dashboard;
+export default Workout;
