@@ -24,6 +24,7 @@ export async function POST(request) {
     
         let user = new User(req);
         const result = await user.save();
+
         return NextResponse.json({result, success:true});
     }catch(error) {
         console.log(error);

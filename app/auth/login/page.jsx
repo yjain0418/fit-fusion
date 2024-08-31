@@ -4,10 +4,40 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from 'react';
 import React from "react";
 
 const Login = () => {
     const router = useRouter();
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const checkLogin = async () => {
+      try{
+        let result = await fetch("/api/users/login", {
+          method:"POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        result = await result.json();
+        console.log(result)
+
+        if (result.success) {
+          alert("Login success");
+          router.push("/dashboard");
+        } else {
+          alert("Login failed");
+        }
+
+        
+      }catch(error) {
+        console.log("Login failed", error.message);
+      }
+    }
   return (
     <>
       <Navbar />
@@ -21,10 +51,10 @@ const Login = () => {
           {/* right section */}
           <div className="flex flex-col justify-center items-center gap-4 mx-4">
             <h2 className="text-3xl">Login</h2>
-            <Input placeholder="Email" className="bg-white" />
-            <Input placeholder="Password" className="bg-white" />
+            <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white" />
+            <Input placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white" />
 
-            <Button className="items-center w-full">Login</Button>
+            <Button className="items-center w-full" onClick={checkLogin}>Login</Button>
             <div className="mt-4">
               <h2>
                 Don't have an Account ? <span className="cursor-pointer hover:text-red-500" onClick={()=> router.replace('/auth/signup')}>Sign Up</span>
