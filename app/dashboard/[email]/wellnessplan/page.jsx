@@ -23,6 +23,7 @@ const WellnessPlan = () => {
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  const [waistline, setWaistLine] = useState("");
   const [bmi, setBmi] = useState(null);
   const [bmiCategory, setBmiCategory] = useState("");
   const router = useRouter();
@@ -137,6 +138,18 @@ const WellnessPlan = () => {
                 />
               </div>
 
+              <div className="mb-4">
+                <Input
+                  className="bg-white w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="Waistline (cm)"
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWaistLine(e.target.value)}
+                  min="10"
+                  max="220"
+                />
+              </div>
+
               <div className="flex justify-center mt-6">
                 <Button onClick={calculateBMI}>Submit</Button>
               </div>
@@ -157,7 +170,6 @@ const WellnessPlan = () => {
                 </p>
               </div>
               <Pie data={pieChartData} options={pieChartOptions} />{" "}
-              {/* Render the pie chart */}
               <div className="flex justify-center mt-6">
                 {bmiCategory !== "Normal" ? (
                   <Button
@@ -170,8 +182,6 @@ const WellnessPlan = () => {
                 ) : (
                   ""
                 )}
-
-                {}
               </div>
             </>
           )}
