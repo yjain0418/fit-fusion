@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
+import { Button } from "@/components/ui/button";
 
 const options = [
   { name: "Diet Plan", path: "/plan" },
