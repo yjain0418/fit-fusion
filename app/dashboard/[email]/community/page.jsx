@@ -13,7 +13,7 @@ const Community = () => {
         <main>
 
           <div className='flex justify-center items-center flex-col gap-8 mt-40'>
-            <Image src={'/teamwork.gif'} width={400} height={400} className='rounded-full' />
+            <Image src={'/teamwork.gif'} width={400} height={400} className='rounded-full' unoptimized />
             <h1 className='text-4xl'>Developers on Work...</h1>
           </div>
         </main>
