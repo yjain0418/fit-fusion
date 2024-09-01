@@ -14,6 +14,7 @@ import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -28,8 +29,44 @@ const WellnessPlan = () => {
   const [bmiCategory, setBmiCategory] = useState("");
   const router = useRouter();
   const path = usePathname();
+  const [loading, setLoading] = useState(false);
+  const [value, setValue] = useState("");
 
   const email = path.split("/")[2];
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/health", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          age: age,
+          height: height,
+          weight: weight,
+          sex: selectedSex === "male" ? 1 : 0,
+          waistline: waistline,
+        }),
+      });
+
+      const data = await response.json();
+      // console.log(data.result);
+      setValue(data.result);
+      // if (data.result) {
+      //   alert(data.result);
+      // } else {
+      //   alert("Prediction failed");
+      // }
+    } catch (error) {
+      console.log("Prediction failed:", error);
+      // alert("Prediction failed, please try again.");
+    } finally {
+      setLoading(false);
+      setStep(2);
+    }
+  };
 
   const calculateBMI = () => {
     const heightInMeters = height / 100;
@@ -38,7 +75,6 @@ const WellnessPlan = () => {
     );
     setBmi(calculatedBmi);
     determineBmiCategory(calculatedBmi);
-    setStep(2);
   };
 
   const determineBmiCategory = (bmi) => {
@@ -79,6 +115,11 @@ const WellnessPlan = () => {
         enabled: true,
       },
     },
+  };
+
+  const handleButtonClick = async () => {
+    calculateBMI();
+    await handleSubmit();
   };
 
   return (
@@ -143,7 +184,7 @@ const WellnessPlan = () => {
                   className="bg-white w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder="Waistline (cm)"
                   type="number"
-                  value={weight}
+                  value={waistline}
                   onChange={(e) => setWaistLine(e.target.value)}
                   min="10"
                   max="220"
@@ -151,7 +192,15 @@ const WellnessPlan = () => {
               </div>
 
               <div className="flex justify-center mt-6">
-                <Button onClick={calculateBMI}>Submit</Button>
+                <Button onClick={handleButtonClick} disabled={loading}>
+                  {loading ? (
+                    <div className="flex items-center">
+                      <Loader2 className="animate-spin mr-2" /> Loading...
+                    </div>
+                  ) : (
+                    "Submit"
+                  )}
+                </Button>
               </div>
             </>
           )}
@@ -171,7 +220,7 @@ const WellnessPlan = () => {
               </div>
               <Pie data={pieChartData} options={pieChartOptions} />{" "}
               <div className="flex justify-center mt-6">
-                {bmiCategory !== "Normal" ? (
+                {value !== "The person is healthy. Cheers to good health" ? (
                   <Button
                     onClick={() =>
                       router.replace(`/dashboard/${email}/personalisedplan`)
@@ -182,6 +231,10 @@ const WellnessPlan = () => {
                 ) : (
                   ""
                 )}
+              </div>
+
+              <div className="mt-8">
+                <h2 className="text-center text-2xl">{value}</h2>
               </div>
             </>
           )}
