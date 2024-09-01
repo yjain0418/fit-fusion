@@ -76,7 +76,7 @@ const Workout = () => {
     <>
       <div className="flex">
         <Sidebar />
-        <section className="flex-1">
+        <section className="p-10 w-[77vw] absolute left-[23vw] h-screen overflow-hidden">
           <ProfileNavbar />
           <main>
             <div className="p-8">

@@ -95,12 +95,13 @@ const Profile = () => {
                     height={40}
                   />
                 </h1>
-                <div className="w-full h-full flex flex-wrap py-8 justify-center items-center">
+                <div className="w-full h-full flex justify-center items-center">
                   {/* {images.map((item, index) => {
                     return <div key={index} className="rounded-xl object-cover w-[80px] h-[80px] object-center overflow-hidden mx-2">
-                      <Image src={item} alt={`badge:${index+1}`} width={80} height={80} />
+                    <Image src={item} alt={`badge:${index+1}`} width={80} height={80} />
                     </div>;
-                  })} */}
+                    })} */}
+                    <Image src={'/nodata.png'} width={100} height={100} />
                 </div>
               </div>
               <div className="h-1/2 w-full bg-[#fff6ee] shadow-xl border-zinc-700/10 border-2 rounded-2xl px-16 py-6">
@@ -113,6 +114,11 @@ const Profile = () => {
                     height={40}
                   />{" "}
                 </h1>
+
+                <div className="w-full h-full flex justify-center items-center">
+                  <Image src={'/nodata.png'} width={100} height={100} />  
+                </div>
+
               </div>
             </div>
           </div>
