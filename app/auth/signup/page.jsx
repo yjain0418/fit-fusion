@@ -53,7 +53,7 @@ const SignUp = () => {
             <h2 className="text-3xl">Sign Up</h2>
             <Input placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} className="bg-white" />
             <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white" />
-            <Input placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white" />
+            <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white" />
 
             <Button className="items-center w-full" onClick={addUser}>Sign Up</Button>
             <div className="mt-4">
