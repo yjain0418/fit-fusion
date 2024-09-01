@@ -15,9 +15,9 @@ const Dashboard = () => {
   return (
     <div className="flex">
       <Sidebar />
-      <section>
+      <section className="w-[77vw] absolute left-[23vw]">
         <ProfileNavbar />
-        <main className="px-10 py-8 w-[80vw] h-screen">
+        <main className="px-10 py-8 w-[77vw] h-screen">
           <div>
             <h1 className="text-4xl font-semibold">Hey, John Doe</h1>
             <h3 className="text-md font-light text-slate-500">
