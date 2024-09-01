@@ -1,9 +1,11 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import React from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import React from "react";
 
 const options = [
+  { name: "Dashboard", path: "" },
   { name: "Diet Plan", path: "/plan" },
   { name: "Nutritioner and Coaches", path: "/coaches" },
   { name: "Community", path: "/community" },
@@ -13,25 +15,28 @@ const options = [
 const Sidebar = () => {
   const router = useRouter();
   const path = usePathname();
-
   const email = path.split("/")[2];
 
   return (
-    <div className="flex flex-col border-r-zinc-900 border-r-[0.2px] py-10 h-screen rounded-r-2xl">
+    <div className="fixed top-0 left-0 w-[23vw] flex flex-col border-r-zinc-900 border-r-[0.2px] py-10 h-screen rounded-r-2xl">
       <Image
         src={"/logo.png"}
         alt="logo"
         width={350}
         height={350}
-        className="mb-4 mx-auto"
+        className="mb-4 mx-auto cursor-pointer"
+        onClick={() => router.push(`/dashboard/${email}`)}
       />
       <hr className="w-full bg-zinc-900" />
       <div className="px-6 flex flex-col gap-3 text-xl my-6 h-3/4 font-thin">
         {options.map((item, index) => {
-          const isActive = path.includes(item.path);
+          const isActive =
+            item.path === ""
+              ? path === `/dashboard/${email}`
+              : path.includes(item.path);
           return (
             <div
-            key={index}
+              key={index}
               className={`cursor-pointer px-6 py-3 rounded-2xl ${
                 isActive ? "bg-red-900/10" : ""
               }`}
@@ -43,6 +48,10 @@ const Sidebar = () => {
             </div>
           );
         })}
+      </div>
+
+      <div className="justify-center items-center px-8 py-3 mb-3">
+        <Button onClick={()=> router.push(`/dashboard/${email}/wellnessplan`)}>Get Customised Plan</Button>
       </div>
 
       <hr />
