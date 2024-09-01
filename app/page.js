@@ -10,14 +10,12 @@ import FAQ from "./_components/FAQ";
 import Newsletter from "./_components/Newsletter";
 import Footer from "./_components/Footer";
 
-// Image data array
-const images = ["/image3.jpg" , "/image1.jpg", "/image2.jpg"];
 
 export default function Home() {
   return (
     <>
       <Navbar />
-      <ImageSlider height={"460px"} images={images}/>
+      <ImageSlider/>
       <Content />
       <WhatWeOffer />
       <Feedback />

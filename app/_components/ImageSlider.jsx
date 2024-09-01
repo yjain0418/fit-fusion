@@ -3,7 +3,9 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function ImageSlider({ height, images }) {
+const images = ["/image3.jpg", "/image1.jpg", "/image2.jpg"];
+
+export default function ImageSlider() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -39,7 +41,7 @@ export default function ImageSlider({ height, images }) {
   return (
     <div className="relative h-full w-full mx-auto mt-12">
       <div
-        className={`relative h-[${height}] mx-12 group hover:-translate-y-2`}
+        className={`relative h-[460px] mx-12 group hover:-translate-y-2`}
         onMouseOver={handleMouseOver}
         onMouseLeave={handleMouseLeave}
       >
