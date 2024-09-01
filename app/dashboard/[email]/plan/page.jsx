@@ -7,7 +7,7 @@ const DietPlan = () => {
     <>
     <div className='flex'>
       <Sidebar />
-      <section>
+      <section className="w-[77vw] absolute left-[23vw]">
         <ProfileNavbar />
         <main>
           <div></div>

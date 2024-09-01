@@ -2,8 +2,6 @@
 import React from "react";
 import Sidebar from "../../_components/Sidebar";
 import Image from "next/image";
-import Coin from "../../_components/Coin";
-import Profileicon from "../../_components/profileicon";
 import ProfileNavbar from "../../_components/ProfileNavbar";
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
@@ -40,7 +38,7 @@ const Profile = () => {
     <>
       <div className="flex">
         <Sidebar />
-        <div className="p-10 w-full h-screen">
+        <div className="p-10 w-[77vw] absolute left-[23vw] h-screen">
           <ProfileNavbar />
           <div className="bg-zinc-500/10 shadow-xl w-full h-full rounded-2xl flex gap-20 mt-10 p-10">
             <div className="bg-[#fff6ee] shadow-2xl border-zinc-800/10 border-2 w-1/2 h-full rounded-2xl">
