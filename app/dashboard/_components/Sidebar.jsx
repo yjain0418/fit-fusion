@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import React from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -47,6 +48,10 @@ const Sidebar = () => {
             </div>
           );
         })}
+      </div>
+
+      <div className="justify-center items-center px-8 py-3 mb-3">
+        <Button onClick={()=> router.push(`/dashboard/${email}/wellnessplan`)}>Get Customised Plan</Button>
       </div>
 
       <hr />
