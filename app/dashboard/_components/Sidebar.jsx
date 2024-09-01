@@ -1,9 +1,10 @@
 "use client";
+import React from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import React from "react";
 
 const options = [
+  { name: "Dashboard", path: "" },
   { name: "Diet Plan", path: "/plan" },
   { name: "Nutritioner and Coaches", path: "/coaches" },
   { name: "Community", path: "/community" },
@@ -13,7 +14,6 @@ const options = [
 const Sidebar = () => {
   const router = useRouter();
   const path = usePathname();
-
   const email = path.split("/")[2];
 
   return (
@@ -23,15 +23,19 @@ const Sidebar = () => {
         alt="logo"
         width={350}
         height={350}
-        className="mb-4 mx-auto"
+        className="mb-4 mx-auto cursor-pointer"
+        onClick={() => router.push(`/dashboard/${email}`)}
       />
       <hr className="w-full bg-zinc-900" />
       <div className="px-6 flex flex-col gap-3 text-xl my-6 h-3/4 font-thin">
         {options.map((item, index) => {
-          const isActive = path.includes(item.path);
+          const isActive =
+            item.path === ""
+              ? path === `/dashboard/${email}`
+              : path.includes(item.path);
           return (
             <div
-            key={index}
+              key={index}
               className={`cursor-pointer px-6 py-3 rounded-2xl ${
                 isActive ? "bg-red-900/10" : ""
               }`}

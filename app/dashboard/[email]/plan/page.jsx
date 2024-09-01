@@ -1,5 +1,6 @@
 import React from 'react'
 import Sidebar from '../../_components/Sidebar'
+import ProfileNavbar from '../../_components/ProfileNavbar'
 
 const DietPlan = () => {
   return (
@@ -7,6 +8,7 @@ const DietPlan = () => {
     <div className='flex'>
       <Sidebar />
       <section>
+        <ProfileNavbar />
         <main>
           <div></div>
           <div></div>
