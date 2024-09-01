@@ -18,7 +18,7 @@ const Sidebar = () => {
   const email = path.split("/")[2];
 
   return (
-    <div className="flex flex-col border-r-zinc-900 border-r-[0.2px] py-10 h-screen rounded-r-2xl">
+    <div className="fixed top-0 left-0 w-[23vw] flex flex-col border-r-zinc-900 border-r-[0.2px] py-10 h-screen rounded-r-2xl">
       <Image
         src={"/logo.png"}
         alt="logo"
