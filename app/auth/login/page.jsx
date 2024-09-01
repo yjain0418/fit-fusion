@@ -52,7 +52,7 @@ const Login = () => {
           <div className="flex flex-col justify-center items-center gap-4 mx-4">
             <h2 className="text-3xl">Login</h2>
             <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white" />
-            <Input placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white" />
+            <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white" />
 
             <Button className="items-center w-full" onClick={checkLogin}>Login</Button>
             <div className="mt-4">
