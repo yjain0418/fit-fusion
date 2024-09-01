@@ -2,9 +2,25 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Footer from "@/app/_components/Footer";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
+import { chatSession } from "@/utils/GeminiModal";
 
 const PersonalisedPlan = () => {
-  const [step, setStep] = useState(2);
+  const [selectedSex, setSelectedSex] = useState("");
+  const [age, setAge] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [waistline, setWaistLine] = useState("");
+  const [step, setStep] = useState(1);
   const [selectedMedicalConditions, setSelectedMedicalConditions] = useState(
     []
   );
@@ -12,6 +28,27 @@ const PersonalisedPlan = () => {
   const [selectedDiet, setSelectedDiet] = useState([]);
   const [selectedFamilyHistory, setSelectedFamilyHistory] = useState([]);
   const [speciallyAbled, setSpeciallyAbled] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const getResult = async () => {
+
+    const prompt = `I am ${age} years old, weigh ${weight} kg, and am ${height} cm tall. I have the following existing conditions: ${selectedMedicalConditions}. My lifestyle is ${selectedLifestyle}. My diet primarily consists of: ${selectedDiet}. I have a family history of the following illnesses: ${selectedFamilyHistory}. Please provide a concise health risk assessment, including any potential risks based on my profile. Then, list clear and distinct health measures I can take to mitigate these risks. Please assess my health risks and suggest possible health measures to prevent future health hazards. Also suggest any potential diet and lifestyle changes in a different section. Avoid repetition and ensure each recommendation is unique. Summarize your suggestions briefly at the end.`;
+
+    setLoading(true); // Start loading
+    try {
+      const result = await chatSession.sendMessage(prompt);
+      const mockJsonResp = result.response
+      .text()
+      .trim()
+      .replace(/^```json/, "")
+      .replace(/```$/, "")
+      console.log(JSON.parse(mockJsonResp));
+    } catch (error) {
+      console.error("Error generating content:", error);
+    } finally {
+      setLoading(false); // End loading
+    }
+  };
 
   const medicalConditions = [
     "Heart Disease",
@@ -113,6 +150,78 @@ const PersonalisedPlan = () => {
     <>
       <div className="flex items-center justify-center min-h-screen p-12">
         <div className="bg-white p-8 rounded-xl shadow-md max-w-xl w-full">
+          {step === 1 && (
+            <>
+              <h2 className="mb-6 text-2xl font-semibold text-center">
+                Personal Details
+              </h2>
+              <div className="mb-4">
+                <Select onValueChange={(value) => setSelectedSex(value)}>
+                  <SelectTrigger className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none bg-white">
+                    <SelectValue placeholder="Sex" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="mb-4">
+                <Input
+                  className="bg-white w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="Age"
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  min="0"
+                  max="120"
+                />
+              </div>
+
+              <div className="mb-4">
+                <Input
+                  className="bg-white w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="Height (cm)"
+                  type="number"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  min="20"
+                  max="220"
+                />
+              </div>
+
+              <div className="mb-4">
+                <Input
+                  className="bg-white w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="Weight (kg)"
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  min="20"
+                  max="220"
+                />
+              </div>
+
+              <div className="mb-4">
+                <Input
+                  className="bg-white w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="Waistline (cm)"
+                  type="number"
+                  value={waistline}
+                  onChange={(e) => setWaistLine(e.target.value)}
+                  min="10"
+                  max="220"
+                />
+              </div>
+
+              <div className="flex justify-between mt-6">
+                <Button onClick={() => handleBack()}>Back</Button>
+                <Button onClick={() => handleNext()}>Next</Button>
+              </div>
+            </>
+          )}
+
           {step === 2 && (
             <>
               <h2 className="mb-6 text-2xl font-semibold text-center">
@@ -270,7 +379,15 @@ const PersonalisedPlan = () => {
               </div>
               <div className="flex justify-between mt-6">
                 <Button onClick={() => handleBack()}>Back</Button>
-                <Button>Submit</Button>
+                <Button onClick={getResult}>
+                  {loading ? (
+                    <div className="flex items-center">
+                      <Loader2 className="animate-spin mr-2" /> Loading...
+                    </div>
+                  ) : (
+                    "Submit"
+                  )}
+                </Button>
               </div>
             </>
           )}
