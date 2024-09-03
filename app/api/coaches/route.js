@@ -6,7 +6,9 @@ import { NextResponse } from 'next/server';
 export async function GET(req) {
     await mongoose.connect(connString);
 
-    const { search = '', page = 1 } = req.nextUrl.searchParams;
+    const page = req.nextUrl.searchParams.get('page');
+    const search = req.nextUrl.searchParams.get('search');
+
     const perPage = 4;
 
     try {
@@ -16,7 +18,7 @@ export async function GET(req) {
         }
 
         const data = await Profile.find(query)
-            .sort({ name: -1 })
+            .sort({ designation: 1 })
             .skip(perPage * (page - 1))
             .limit(perPage)
             .exec();
@@ -28,7 +30,7 @@ export async function GET(req) {
         return NextResponse.json({
             data,
             current: page,
-            nextPage: hasNextPage ? nextPage : null,
+            hasNextPage: hasNextPage ? true : false,
         }, { status: 200 });
     } catch (error) {
         console.error('Error fetching trainers:', error);

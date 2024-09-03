@@ -13,6 +13,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import Footer from "@/app/_components/Footer";
+import { useRouter } from "next/navigation";
 
 const UpdateProfile = () => {
   const [userType, setUserType] = useState("general");
@@ -24,25 +25,48 @@ const UpdateProfile = () => {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
+  const [coins, setCoins] = useState(0);
+  const [reward, setReward] = useState("");
   const [designation, setDesignation] = useState("");
   const [experience, setExperience] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = {
       name,
-      age,
+      age : Number(age),
       gender,
-      height,
-      weight,
+      height : Number(height),
+      weight : Number(weight),
       email,
       address,
+      coins,
+      reward,
       phone,
       userType,
-      ...(userType === "trainer" && { designation, experience }),
+      ...(userType === "trainer" && { designation, experience : Number(experience)}),
     };
-    alert(JSON.stringify(formData, null, 2)); // Display form data
+
+    if (userType === "general") {
+      formData.designation = "",
+      formData.experience = 0
+    }
+
+    const result = await fetch(`/api/profile/${email}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      }, body: JSON.stringify(formData)
+    })
+    
+    if(result.ok) {
+      alert("Profile updated successfully"); // Display form data
+      router.replace(`/dashboard/${email}/profile`);
+    }else {
+      alert("Profile not updated");
+    }
   };
 
   return (
@@ -81,8 +105,8 @@ const UpdateProfile = () => {
             <div>
               <Label htmlFor="gender">Gender</Label>
               <Select
-              value={gender}
-              onValueChange={(value) => setGender(value)}
+                value={gender}
+                onValueChange={(value) => setGender(value)}
               >
                 <SelectTrigger aria-label="Select Gender" className='bg-white'>
                   <SelectValue placeholder="Select Gender" />
@@ -90,7 +114,7 @@ const UpdateProfile = () => {
                 <SelectContent>
                   <SelectItem value="male">Male</SelectItem>
                   <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="prefer_not_to_say">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -174,13 +198,13 @@ const UpdateProfile = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="trainer" id="trainer" />
-                  <Label htmlFor="trainer">Trainer/Practitioner/Doctor</Label>
+                  <Label htmlFor="trainer">trainer/Practitioner/Doctor</Label>
                 </div>
               </RadioGroup>
             </div>
 
 
-            {/* Designation and Experience (Shown only if user is Trainer/Practitioner/Doctor) */}
+            {/* Designation and Experience (Shown only if user is trainer/Practitioner/Doctor) */}
             {userType === "trainer" && (
               <>
                 <div>
@@ -209,9 +233,9 @@ const UpdateProfile = () => {
 
             {/* Submit Button */}
             <div className="mt-4 justify-center items-center flex">
-                <Button onClick={handleSubmit} >
+              <Button onClick={handleSubmit} >
                 Update Profile
-                </Button>
+              </Button>
             </div>
           </form>
         </div>

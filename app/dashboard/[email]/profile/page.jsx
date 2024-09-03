@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../_components/Sidebar";
 import Image from "next/image";
 import ProfileNavbar from "../../_components/ProfileNavbar";
@@ -16,23 +16,75 @@ const images = [
 ];
 
 const Profile = () => {
-  const userData = {
-    name: "John Doe",
-    age: 30,
-    gender: "Male",
-    height: "180 cm",
-    weight: "75 kg",
-    designation: "Fitness Trainer",
-    experience: "5 years",
-    email: "john@example.com",
-    address: "123 Fitness Street, City",
-    phone: "+1 123-456-7890",
-    userType: "Premium",
-  };
-
+  // const [userType, setUserType] = useState("general");
+  // const [name, setName] = useState("");
+  // const [age, setAge] = useState(0);
+  // const [gender, setGender] = useState("");
+  // const [height, setHeight] = useState(0);
+  // const [weight, setWeight] = useState(0);
+  // const [address, setAddress] = useState("");
+  // const [phone, setPhone] = useState("");
+  // const [coins, setCoins] = useState(0);
+  // const [reward, setReward] = useState("");
+  // const [designation, setDesignation] = useState("");
+  // const [experience, setExperience] = useState(0);
+  const [userData, setUserData] = useState({
+    name : "",
+    userType : "general",
+    age : 0,
+    gender : "",
+    height : 0,
+    weight : 0,
+    address : "",
+    phone : "",
+    coins : 0,
+    reward : "",
+    designation : "",
+    experience : 0
+  })
+  
   const router = useRouter();
   const path = usePathname();
   const email = path.split('/')[2];
+  
+
+
+  useEffect(() => {
+    const userDataFetch = async () => {
+      try {
+        const result = await fetch(`/api/profile/${email}`, {
+          method:"GET",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        })
+        
+        if(result.ok) {
+          const data = await result.json();
+
+          // setName(data.result.name);
+          // setUserType(data.result.userType);
+          // setAge(data.result.age);
+          // setGender(data.result.gender);
+          // setHeight(data.result.height);
+          // setWeight(data.result.weight);
+          // setAddress(data.result.address);
+          // setPhone(data.result.phone);
+          // setCoins(data.result.coins);
+          // setReward(data.result.reward);
+          // setDesignation(data.result.designation || "");
+          // setExperience(data.result.experience || "");
+          setUserData(data.result);
+        } else {
+          console.error('Failed to fetch user data');
+        }
+      } catch (error) {
+        console.error('An error occurred:', error);
+      }
+    }
+
+    userDataFetch();
+  }, [email]);
 
   return (
     <>

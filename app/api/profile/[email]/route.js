@@ -28,7 +28,7 @@ export async function GET(request, { params }) {
     }
 }
 
-export async function POST(request, { params }) {
+export async function PUT(request, { params }) {
     const { email } = params;
 
     if (!email) {
@@ -43,23 +43,31 @@ export async function POST(request, { params }) {
         }
 
         const body = await request.json();
-        const { age, userType, gender, height, weight, phoneNo, address, coins, reward, designation, experience } = body;
+        const { age, userType, gender, height, weight, phone, address, coins, reward, designation, experience } = body;
         const name = data.name;
         
-        if (!age || !userType || !gender || !height || !weight || !phoneNo || !address) {
+        if (!age || !userType || !gender || !height || !weight || !phone || !address) {
             return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
         }
         
-        if(userType == "Trainer") {
+        if(userType == "trainer") {
             if(!designation || !experience) {
                 return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
             }
         }
 
-        const newProfile = new Profile({ name, email, age, userType, gender, height, weight, phoneNo, address, coins, reward, designation, experience });
-        await newProfile.save();
+        // Update the profile
+        const updatedProfile = await Profile.findOneAndUpdate(
+            { email: email },
+            { name, age, userType, gender, height, weight, phone, address, coins, reward, designation, experience },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
 
-        return NextResponse.json({ success: true, result: newProfile }, { status: 201 });
+        if (!updatedProfile) {
+            return NextResponse.json({ success: false, message: 'Profile not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, result: updatedProfile }, { status: 200 });
     } catch (error) {
         console.error('Error creating profile:', error);
         return NextResponse.json({ success: false, message: 'Failed to create profile' }, { status: 500 });
