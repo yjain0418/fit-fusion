@@ -17,6 +17,25 @@ const Sidebar = () => {
   const path = usePathname();
   const email = path.split("/")[2];
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/users/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        router.push('/auth/login');
+      } else {
+        console.error('Failed to logout');
+      }
+    } catch (error) {
+      console.error('An error occurred during logout', error);
+    }
+  };
+
   return (
     <div className="fixed top-0 left-0 w-[23vw] flex flex-col border-r-zinc-900 border-r-[0.2px] py-10 h-screen rounded-r-2xl">
       <Image
@@ -56,7 +75,7 @@ const Sidebar = () => {
 
       <hr />
 
-      <div className="flex justify-start px-12 mt-6 font-thin gap-6 text-black text-center text-xl cursor-pointer">
+      <div className="flex justify-start px-12 mt-6 font-thin gap-6 text-black text-center text-xl cursor-pointer" onClick={handleLogout}>
         <Image src={"/exit.png"} alt="exit" width={25} height={25} /> Logout
       </div>
     </div>

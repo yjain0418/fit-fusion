@@ -22,14 +22,14 @@ const SignUp = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),  // Correctly format the body as an object
+        body: JSON.stringify({ name, email, password }),
       });
 
       result = await result.json();
 
       if (result.success) {
         alert("New user added");
-        router.push('/auth/login');  // Redirect to login after successful signup
+        router.push('/auth/login');
       } else {
         alert("Signup failed");
       }
