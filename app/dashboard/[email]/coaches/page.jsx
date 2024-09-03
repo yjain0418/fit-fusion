@@ -14,62 +14,81 @@ import {
 import React, { useState, useEffect } from "react";
 
 // Sample data for coaches
-const coachesData = [
-  {
-    name: "Emily Johnson",
-    age: 28,
-    designation: "Doctor",
-    experience: 5,
-    image: "/emily.jpeg",
-  },
-  {
-    name: "David Hoggin",
-    age: 35,
-    designation: "Trainer",
-    experience: 12,
-    image: "/david.jpeg",
-  },
-  {
-    name: "Sarah Jones",
-    age: 25,
-    designation: "Nutritionist",
-    experience: 1,
-    image: "/sarah.jpeg",
-  },
-  {
-    name: "Michael Smith",
-    age: 40,
-    designation: "Psychiatrist",
-    experience: 15,
-    image: "/michael.jpeg",
-  },
-  // More sample data can be added here...
-];
+// const coachesData = [
+//   {
+//     name: "Emily Johnson",
+//     age: 28,
+//     designation: "Doctor",
+//     experience: 5,
+//     image: "/emily.jpeg",
+//   },
+//   {
+//     name: "David Hoggin",
+//     age: 35,
+//     designation: "Trainer",
+//     experience: 12,
+//     image: "/david.jpeg",
+//   },
+//   {
+//     name: "Sarah Jones",
+//     age: 25,
+//     designation: "Nutritionist",
+//     experience: 1,
+//     image: "/sarah.jpeg",
+//   },
+//   {
+//     name: "Michael Smith",
+//     age: 40,
+//     designation: "Psychiatrist",
+//     experience: 15,
+//     image: "/michael.jpeg",
+//   },
+//   // More sample data can be added here...
+// ];
 
-const ITEMS_PER_PAGE = 2; // Number of coaches to display per page
+const ITEMS_PER_PAGE = 4; // Number of coaches to display per page
 
 const Coaches = () => {
   const [designation, setDesignation] = useState("");
   const [page, setPage] = useState(1); // Track the current page
   const [coaches, setCoaches] = useState([]); // Coaches data to display
+  const [hasNextPage, setHasNextPage] = useState(false); // Check if there's a next page
 
-  // Simulate fetching data based on the page number
-  const fetchCoachesData = (pageNumber) => {
-    // Calculate the start and end index for slicing the data array
-    const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const paginatedCoaches = coachesData.slice(startIndex, endIndex);
-    setCoaches(paginatedCoaches);
+  const fetchCoaches = async (page, designation) => {
+    try {
+      const result = await fetch(`/api/coaches?page=${page}&search=${designation}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (result.ok) {
+        const res = await result.json();
+        setCoaches(res.data); // Update the coaches data
+        setHasNextPage(res.hasNextPage);
+      } else {
+        console.error("Error occurred while fetching coaches");
+      }
+    } catch (error) {
+      console.error("Error occurred: " + error);
+    }
   };
 
-  // Fetch coaches data whenever the page changes
+  // Fetch coaches data whenever the page or designation changes
   useEffect(() => {
-    fetchCoachesData(page);
-  }, [page]);
+    fetchCoaches(page, designation);
+  }, [page, designation]);
+
+  // Handle Select value change
+  const handleDesignationChange = (value) => {
+    setDesignation(value);
+    setPage(1); // Reset page to 1 when designation changes
+  };
 
   // Handle Next button click
   const handleNext = () => {
-    if (page * ITEMS_PER_PAGE < coachesData.length) {
+    if (hasNextPage) {
       setPage((prevPage) => prevPage + 1);
     }
   };
@@ -89,15 +108,15 @@ const Coaches = () => {
           <div className="w-3/4">
             <div className="flex justify-between items-center w-full h-16">
               <div className="w-1/2 h-full flex items-center justify-center">
-                <Select onValueChange={(value) => setDesignation(value)}>
+                <Select onValueChange={handleDesignationChange}>
                   <SelectTrigger className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none bg-white">
                     <SelectValue placeholder="Designation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Trainers">Trainers</SelectItem>
-                    <SelectItem value="Doctors">Doctors</SelectItem>
-                    <SelectItem value="Nutritionists">Nutritionists</SelectItem>
-                    <SelectItem value="Psychiatrists">Psychiatrists</SelectItem>
+                    <SelectItem value="Trainer">Trainers</SelectItem>
+                    <SelectItem value="Doctor">Doctors</SelectItem>
+                    <SelectItem value="Nutritionist">Nutritionists</SelectItem>
+                    <SelectItem value="Psychiatrist">Psychiatrists</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -128,12 +147,10 @@ const Coaches = () => {
               </button>
               <button
                 className={`px-4 py-2 mx-2 border rounded ${
-                  page * ITEMS_PER_PAGE >= coachesData.length
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-blue-500 text-white"
+                  hasNextPage ? "bg-blue-500 text-white" : "bg-gray-300 cursor-not-allowed"
                 }`}
                 onClick={handleNext}
-                disabled={page * ITEMS_PER_PAGE >= coachesData.length}
+                disabled={!hasNextPage}
               >
                 Next
               </button>
