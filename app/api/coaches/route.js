@@ -9,7 +9,7 @@ export async function GET(req) {
     const page = req.nextUrl.searchParams.get('page');
     const search = req.nextUrl.searchParams.get('search');
 
-    const perPage = 4;
+    const perPage = 9;
 
     try {
         const query = { userType: 'Trainer' };
