@@ -37,12 +37,12 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-[23vw] flex flex-col border-r-zinc-900 border-r-[0.2px] py-10 h-screen rounded-r-2xl">
+    <div className="fixed top-0 left-0 w-[20vw] flex flex-col border-r-zinc-900 border-r-[0.2px] py-10 h-screen rounded-r-2xl">
       <Image
         src={"/logo.png"}
         alt="logo"
-        width={350}
-        height={350}
+        width={300}
+        height={300}
         className="mb-4 mx-auto cursor-pointer"
         onClick={() => router.push(`/dashboard/${email}`)}
       />
@@ -75,8 +75,8 @@ const Sidebar = () => {
 
       <hr />
 
-      <div className="flex justify-start px-12 mt-6 font-thin gap-6 text-black text-center text-xl cursor-pointer" onClick={handleLogout}>
-        <Image src={"/exit.png"} alt="exit" width={25} height={25} /> Logout
+      <div className="flex justify-start px-12 mt-6 font-thin gap-6 text-black text-center text-lg cursor-pointer" onClick={handleLogout}>
+        <Image src={"/exit.png"} alt="exit" width={22} height={22} /> Logout
       </div>
     </div>
   );

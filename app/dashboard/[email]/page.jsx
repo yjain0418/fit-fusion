@@ -2,7 +2,7 @@ import React from "react";
 import Sidebar from "../_components/Sidebar";
 import ProfileNavbar from "../_components/ProfileNavbar";
 import Image from "next/image";
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@/components/ui/progress";
 
 const daily = [
   { src: "/sleeping.png", title: "Sleep", desc: "8 hrs last night" },
@@ -59,13 +59,8 @@ const Dashboard = () => {
               <h1 className="text-xl font-semibold">Fitness Acitivity</h1>
             </div>
             <div className="w-1/4 h-full bg-white/70 rounded-2xl px-10 py-4 flex flex-col items-center justify-start">
-              <div className="w-[150px] height-[150px] rounded-full overflow-hidden">
-                <Image
-                  src={"/john.jpeg"}
-                  alt="profile"
-                  width={150}
-                  height={40}
-                />
+              <div className="rounded-full overflow-hidden">
+                <Image src={"/user.png"} alt="profile" width={80} height={80} />
               </div>
               <h1 className="text-2xl font-semibold mt-4">John Doe</h1>
               <h3 className="text-sm  font-light ">Fitness Trainer</h3>
@@ -109,7 +104,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="2 bg-white/70 w-1/4 h-full py-2 px-8 rounded-2xl ">
+            <div className="bg-white/70 w-1/4 h-full py-2 px-8 rounded-2xl flex flex-col">
               <div className="flex items-center justify-start gap-6">
                 <Image src={"/cycling.png"} alt="" width={40} height={40} />
 
@@ -122,12 +117,13 @@ const Dashboard = () => {
               <div className="flex flex-col gap-2 my-4 justify-center items-start">
                 <h3 className="text-xs text-slate-600">Progress</h3>
                 <Progress value={28} />
-
               </div>
 
               <div className="flex justify-between items-center">
                 <p className="text-xs text-slate-600">24 / 30 km</p>
-                <div className="w-20 h-6 rounded-2xl justify-center items-center flex text-xs bg-green-200 border-green-400 text-green-600">1 Day Left</div>
+                <div className="w-20 h-6 rounded-2xl justify-center items-center flex text-xs bg-green-200 border-green-400 text-green-600">
+                  1 Day Left
+                </div>
               </div>
             </div>
 

@@ -14,13 +14,13 @@ const Profileicon = () => {
   };
 
   return (
-    <div className="cursor-pointer rounded-full w-[50px] h-[50px] overflow-hidden">
+    <div className="cursor-pointer rounded-full w-[40px] h-[40px] overflow-hidden">
       {" "}
       <Image
-        src={"/john.jpeg"}
+        src={"/user.png"}
         alt="profile_icon"
-        height={100}
-        width={80}
+        height={60}
+        width={60}
         onClick={handleProfileClick}
       />{" "}
     </div>
