@@ -80,13 +80,13 @@ const Workout = () => {
           <ProfileNavbar />
           <main>
             <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">
+              <h1 className="text-3xl font-bold mb-4">
                 Workout Plan for John Doe
               </h1>
 
               {/* Select Body Part */}
               <div className="mb-4">
-                <label className="mr-2 font-medium">Select Body Part:</label>
+                <label className="mr-2 font-lg">Select Body Part:</label>
                 <Select
                   value={bodyPart}
                   onValueChange={(value) => setBodyPart(value)}

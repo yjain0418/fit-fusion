@@ -6,12 +6,14 @@ import Profileicon from "./Profileicon";
 const ProfileNavbar = () => {
   return (
     <div className="absolute flex right-16 top-6 justify-center items-start gap-6">
-      <div className="flex justify-center items-center gap-2">
-        <p>0</p>
-        <Coin />
+      <div className="flex items-center gap-6">
+        <div className="flex justify-center items-center gap-2">
+          <p>0</p>
+          <Coin />
+        </div>
+        {/* Make sure the Profileicon is clickable */}
+        <Profileicon />
       </div>
-      {/* Make sure the Profileicon is clickable */}
-      <Profileicon />
     </div>
   );
 };

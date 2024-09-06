@@ -1,9 +1,10 @@
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import React from "react";
 
 const Card = ({ user }) => {
   return (
-    <div className="w-64 h-auto bg-white/80 rounded-2xl shadow-xl flex flex-col justify-center items-center px-8 py-6 space-y-6">
+    <div className="w-64 h-auto bg-white/80 rounded-2xl shadow-xl flex flex-col justify-center items-center px-12 py-6 space-y-6">
       {/* Circular Image */}
       <Image
         src={user.image}
@@ -29,9 +30,12 @@ const Card = ({ user }) => {
       <div className="w-full border-t border-gray-200 mt-4"></div>
 
       {/* Action Button */}
-      <button className="mt-4 px-6 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
-        View Profile
-      </button>
+      <div className="flex items-center gap-4 justify-between">
+        <button className="px-6 py-2 bg-blue-500 text-white text-md font-medium rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+          Profile
+        </button>
+        <Button>Contact</Button>
+      </div>
     </div>
   );
 };

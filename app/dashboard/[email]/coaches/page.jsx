@@ -46,13 +46,13 @@ import React, { useState, useEffect } from "react";
 //   // More sample data can be added here...
 // ];
 
-const ITEMS_PER_PAGE = 4; // Number of coaches to display per page
+const ITEMS_PER_PAGE = 8;
 
 const Coaches = () => {
   const [designation, setDesignation] = useState("");
-  const [page, setPage] = useState(1); // Track the current page
-  const [coaches, setCoaches] = useState([]); // Coaches data to display
-  const [hasNextPage, setHasNextPage] = useState(false); // Check if there's a next page
+  const [page, setPage] = useState(1);
+  const [coaches, setCoaches] = useState([]);
+  const [hasNextPage, setHasNextPage] = useState(false);
 
   const fetchCoaches = async (page, designation) => {
     try {
@@ -65,7 +65,7 @@ const Coaches = () => {
 
       if (result.ok) {
         const res = await result.json();
-        setCoaches(res.data); // Update the coaches data
+        setCoaches(res.data);
         setHasNextPage(res.hasNextPage);
       } else {
         console.error("Error occurred while fetching coaches");
@@ -129,7 +129,7 @@ const Coaches = () => {
             <div className="heading text-4xl font-semibold mb-4">
               {designation === "" ? "Nutritionist and Coaches" : designation}
             </div>
-            <div className="flex flex-wrap gap-12 px-12 py-8">
+            <div className="flex flex-wrap gap-12 py-8">
               {coaches.map((item, index) => (
                 <Card key={index} user={item} />
               ))}
