@@ -10,6 +10,7 @@ const options = [
   { name: "Nutritioner and Coaches", path: "/coaches" },
   { name: "Community", path: "/community" },
   { name: "Workout Plans", path: "/workout" },
+  { name: "BMI Calculator", path: "/wellnessplan" },
 ];
 
 const Sidebar = () => {
@@ -70,7 +71,7 @@ const Sidebar = () => {
       </div>
 
       <div className="justify-center items-center px-8 py-3 mb-3">
-        <Button onClick={()=> router.push(`/dashboard/${email}/wellnessplan`)}>Get Customised Plan</Button>
+        <Button onClick={()=> router.push(`/dashboard/${email}/personalisedplan`)}>Get Personalized Plan</Button>
       </div>
 
       <hr />

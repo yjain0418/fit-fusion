@@ -1,8 +1,10 @@
 "use client";
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
+// Dynamically import react-markdown to avoid SSR issues
+const ReactMarkdown = dynamic(() => import('react-markdown'), { ssr: false });
 import { Button } from "@/components/ui/button";
 import Footer from "@/app/_components/Footer";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { chatSession } from "@/utils/GeminiModal";
 
 const PersonalisedPlan = () => {
   const [selectedSex, setSelectedSex] = useState("");
@@ -21,32 +22,40 @@ const PersonalisedPlan = () => {
   const [weight, setWeight] = useState("");
   const [waistline, setWaistLine] = useState("");
   const [step, setStep] = useState(1);
-  const [selectedMedicalConditions, setSelectedMedicalConditions] = useState(
-    []
-  );
+  const [selectedMedicalConditions, setSelectedMedicalConditions] = useState([]);
   const [selectedLifestyle, setSelectedLifestyle] = useState([]);
   const [selectedDiet, setSelectedDiet] = useState([]);
   const [selectedFamilyHistory, setSelectedFamilyHistory] = useState([]);
   const [speciallyAbled, setSpeciallyAbled] = useState("");
   const [loading, setLoading] = useState(false);
+  const [output, setOutput] = useState("");
+  const [showOutput, setShowOutput] = useState(false);
 
   const getResult = async () => {
-
     const prompt = `I am ${age} years old, weigh ${weight} kg, and am ${height} cm tall. I have the following existing conditions: ${selectedMedicalConditions}. My lifestyle is ${selectedLifestyle}. My diet primarily consists of: ${selectedDiet}. I have a family history of the following illnesses: ${selectedFamilyHistory}. Please provide a concise health risk assessment, including any potential risks based on my profile. Then, list clear and distinct health measures I can take to mitigate these risks. Please assess my health risks and suggest possible health measures to prevent future health hazards. Also suggest any potential diet and lifestyle changes in a different section. Avoid repetition and ensure each recommendation is unique. Summarize your suggestions briefly at the end.`;
-
-    setLoading(true); // Start loading
+    setLoading(true);
+  setOutput("");
+  setShowOutput(false);
     try {
-      const result = await chatSession.sendMessage(prompt);
-      const mockJsonResp = result.response
-      .text()
-      .trim()
-      .replace(/^```json/, "")
-      .replace(/```$/, "")
-      console.log(JSON.parse(mockJsonResp));
+      const response = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await response.json();
+      if (data.output) {
+        setOutput(data.output.trim());
+        setShowOutput(true);
+      } else {
+        setOutput("Error: " + (data.error || "Unknown error"));
+        setShowOutput(true);
+      }
     } catch (error) {
-      console.error("Error generating content:", error);
+  setOutput("Error generating content. Please try again.");
+  setShowOutput(true);
+  console.error("Error generating content:", error);
     } finally {
-      setLoading(false); // End loading
+      setLoading(false);
     }
   };
 
@@ -394,6 +403,25 @@ const PersonalisedPlan = () => {
         </div>
       </div>
 
+      {/* Output Section */}
+      {/* Output Modal/Screen */}
+      {showOutput && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white max-w-2xl w-full mx-4 p-8 rounded-xl shadow-lg relative">
+            <button
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
+              onClick={() => setShowOutput(false)}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <h3 className="text-2xl font-semibold mb-4 text-center">Personalised Plan Output</h3>
+            <div className="prose max-w-none text-gray-800 overflow-y-auto max-h-[60vh]">
+              <ReactMarkdown>{output}</ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      )}
       <Footer />
     </>
   );
