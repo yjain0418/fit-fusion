@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
 
 # Load the dataset
-data = pd.read_csv(r"H:/SIH_2024/sih_2024/public/HEALTH DATASET.csv")
+data = pd.read_csv(r"./public/HEALTH DATASET.csv")
 
 # Encode the 'sex' column
 label_encoder = LabelEncoder()

@@ -9,7 +9,7 @@ const poppins = Poppins({ subsets: ["latin"] , weight: '500'});
 
 export const metadata = {
   title: "Fit Fusion",
-  description: "AI-powered fitness and wellness platform offering personalized features for users",
+  description: "AI-powered fitness and wellness platform offering personalized features for users.",
 };
 
 export default function RootLayout({ children }) {

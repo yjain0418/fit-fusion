@@ -15,7 +15,7 @@ export async function POST(req) {
 
     // Spawn the Python script with required arguments
     const python = spawn('python', [
-      'H:\\SIH_2024\\sih_2024\\KNNModel.py',
+      './KNNModel.py',
       age.toString(),
       height.toString(),
       weight.toString(),
