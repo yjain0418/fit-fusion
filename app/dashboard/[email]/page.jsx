@@ -1,5 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react";
+"use client"
+import React, { useEffect, useState } from "react";
 import Sidebar from "../_components/Sidebar";
 import ProfileNavbar from "../_components/ProfileNavbar";
 import Image from "next/image";

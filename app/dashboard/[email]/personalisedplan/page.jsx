@@ -14,8 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { useParams } from "next/navigation";
 
 const PersonalisedPlan = () => {
+  const params = useParams();
+  const email = params?.email || "";
   const [selectedSex, setSelectedSex] = useState("");
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
@@ -30,6 +33,29 @@ const PersonalisedPlan = () => {
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState("");
   const [showOutput, setShowOutput] = useState(false);
+
+    // Fetch profile data on mount
+    React.useEffect(() => {
+      if (!email) return;
+      const fetchProfile = async () => {
+        try {
+          const res = await fetch(`/api/profile/${email}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.result) {
+              setAge(data.result.age ? String(data.result.age) : "");
+              setHeight(data.result.height ? String(data.result.height) : "");
+              setWeight(data.result.weight ? String(data.result.weight) : "");
+              const gender = (data.result.gender || "").toLowerCase();
+              setSelectedSex(gender === "male" ? "male" : gender === "female" ? "female" : "");
+            }
+          }
+        } catch (err) {
+          // Optionally handle error
+        }
+      };
+      fetchProfile();
+    }, [email]);
 
   const getResult = async () => {
     const prompt = `I am ${age} years old, weigh ${weight} kg, and am ${height} cm tall. I have the following existing conditions: ${selectedMedicalConditions}. My lifestyle is ${selectedLifestyle}. My diet primarily consists of: ${selectedDiet}. I have a family history of the following illnesses: ${selectedFamilyHistory}. Please provide a concise health risk assessment, including any potential risks based on my profile. Then, list clear and distinct health measures I can take to mitigate these risks. Please assess my health risks and suggest possible health measures to prevent future health hazards. Also suggest any potential diet and lifestyle changes in a different section. Avoid repetition and ensure each recommendation is unique. Summarize your suggestions briefly at the end.`;
@@ -165,7 +191,7 @@ const PersonalisedPlan = () => {
                 Personal Details
               </h2>
               <div className="mb-4">
-                <Select onValueChange={(value) => setSelectedSex(value)}>
+                <Select value={selectedSex} onValueChange={(value) => setSelectedSex(value)}>
                   <SelectTrigger className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none bg-white">
                     <SelectValue placeholder="Sex" />
                   </SelectTrigger>
