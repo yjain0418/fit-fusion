@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 const options = [
   { name: "Dashboard", path: "" },
-  { name: "Diet Plan", path: "/plan" },
+  // { name: "Diet Plan", path: "/plan" },
   { name: "Nutritioner and Coaches", path: "/coaches" },
   { name: "Community", path: "/community" },
   { name: "Workout Plans", path: "/workout" },

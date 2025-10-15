@@ -91,6 +91,30 @@ const WellnessPlan = () => {
 
   const email = path.split("/")[2];
 
+  // Fetch profile data on mount
+  React.useEffect(() => {
+    if (!email) return;
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(`/api/profile/${email}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.result) {
+            setAge(data.result.age ? String(data.result.age) : "");
+            setHeight(data.result.height ? String(data.result.height) : "");
+            setWeight(data.result.weight ? String(data.result.weight) : "");
+            // Accepts 'male', 'female', or fallback to empty string
+            const gender = (data.result.gender || "").toLowerCase();
+            setSelectedSex(gender === "male" ? "male" : gender === "female" ? "female" : "");
+          }
+        }
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
+    fetchProfile();
+  }, [email]);
+
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -163,7 +187,7 @@ const WellnessPlan = () => {
                 Personal Details
               </h2>
               <div className="mb-4">
-                <Select onValueChange={(value) => setSelectedSex(value)}>
+                <Select value={selectedSex} onValueChange={(value) => setSelectedSex(value)}>
                   <SelectTrigger className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none bg-white">
                     <SelectValue placeholder="Sex" />
                   </SelectTrigger>

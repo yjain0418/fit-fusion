@@ -13,29 +13,32 @@ const Login = () => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const checkLogin = async () => {
+      setLoading(true);
       try{
         let result = await fetch("/api/users/login", {
           method:"POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // Important: This ensures cookies are sent and received
+          credentials: "include",
           body: JSON.stringify({ email, password }),
         });
 
         result = await result.json();
 
         if (result.success) {
-          alert("Login success");
           router.replace(`/dashboard/${email}`);
         } else {
-          alert("Login failed");
+          alert("Login Failed: " + (result.error || "Unknown error"));
         }
         
       }catch(error) {
-        console.log("Login failed");
+        alert("Login Failed: " + (error || "Unknown error"));
+      } finally {
+        setLoading(false);
       }
     }
   return (
@@ -52,7 +55,19 @@ const Login = () => {
             <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white" />
             <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white" />
 
-            <Button className="items-center w-full" onClick={checkLogin}>Login</Button>
+            <Button className="items-center w-full" onClick={checkLogin} disabled={loading}>
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                "Login"
+              )}
+            </Button>
             <div className="mt-4">
               <h2>
                 Don't have an Account ? <span className="cursor-pointer hover:text-red-500" onClick={()=> router.replace('/auth/signup')}>Sign Up</span>

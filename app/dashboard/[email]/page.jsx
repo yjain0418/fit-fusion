@@ -1,8 +1,10 @@
-import React from "react";
+"use client"
+import React, { useEffect, useState } from "react";
 import Sidebar from "../_components/Sidebar";
 import ProfileNavbar from "../_components/ProfileNavbar";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
+import { useParams } from "next/navigation";
 
 const daily = [
   { src: "/sleeping.png", title: "Sleep", desc: "8 hrs last night" },
@@ -12,6 +14,29 @@ const daily = [
 ];
 
 const Dashboard = () => {
+  const params = useParams();
+  const email = params?.email;
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/profile/${email}`);
+        const data = await res.json();
+        if (data.result) {
+          setProfile(data.result);
+        }
+      } catch (err) {
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (email) fetchProfile();
+  }, [email]);
+
   return (
     <div className="flex">
       <Sidebar />
@@ -19,9 +44,13 @@ const Dashboard = () => {
         <ProfileNavbar />
         <main className="px-10 py-8 w-[77vw] h-screen">
           <div>
-            <h1 className="text-4xl font-semibold">Hey, John Doe</h1>
+            <h1 className="text-4xl font-semibold">
+              Hey, {loading ? "Loading..." : profile?.name || "User"}
+            </h1>
             <h3 className="text-md font-light text-slate-500">
-              Here is your daily activity and reports
+              {loading
+                ? "Fetching your details..."
+                : "Here is your daily activity and reports"}
             </h3>
           </div>
 
@@ -35,7 +64,7 @@ const Dashboard = () => {
                     className="card flex gap-6 items-center justify-around px-10 py-12 w-1/4 h-full rounded-2xl bg-white/70"
                   >
                     <div>
-                      <Image src={item.src} alt="" width={40} height={40} />{" "}
+                      <Image src={item.src} alt="" width={40} height={40} />
                     </div>
                     <div>
                       <h1 className="text-2xl font-semibold">{item.title}</h1>
@@ -62,8 +91,27 @@ const Dashboard = () => {
               <div className="rounded-full overflow-hidden">
                 <Image src={"/user.png"} alt="profile" width={80} height={80} />
               </div>
-              <h1 className="text-2xl font-semibold mt-4">John Doe</h1>
-              <h3 className="text-sm  font-light ">Fitness Trainer</h3>
+              <h1 className="text-2xl font-semibold mt-4">
+                {loading ? "Loading..." : profile?.name || "User"}
+              </h1>
+              <h3 className="text-sm font-light ">
+                {loading
+                  ? ""
+                  : profile?.userType === "trainer"
+                  ? "Fitness Trainer"
+                  : profile?.userType || ""}
+              </h3>
+              <div className="mt-2 text-xs text-slate-600">
+                {profile && (
+                  <>
+                    <div>Email: {profile.email}</div>
+                    <div>Age: {profile.age}</div>
+                    <div>Gender: {profile.gender}</div>
+                    <div>Height: {profile.height} cm</div>
+                    <div>Weight: {profile.weight} kg</div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 

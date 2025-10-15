@@ -13,16 +13,17 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import Footer from "@/app/_components/Footer";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 const UpdateProfile = () => {
+  const params = useParams();
+  const email = params?.email || "";
   const [userType, setUserType] = useState("general");
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [coins, setCoins] = useState(0);
@@ -30,6 +31,36 @@ const UpdateProfile = () => {
   const [designation, setDesignation] = useState("");
   const [experience, setExperience] = useState("");
   const router = useRouter();
+
+  // Fetch previous profile details when email is set
+  React.useEffect(() => {
+    if (!email) return;
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(`/api/profile/${email}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.result) {
+            setName(data.result.name || "");
+            setAge(data.result.age ? String(data.result.age) : "");
+            setGender(data.result.gender || "");
+            setHeight(data.result.height ? String(data.result.height) : "");
+            setWeight(data.result.weight ? String(data.result.weight) : "");
+            setAddress(data.result.address || "");
+            setPhone(data.result.phone || "");
+            setCoins(data.result.coins || 0);
+            setReward(data.result.reward || "");
+            setUserType(data.result.userType || "general");
+            setDesignation(data.result.designation || "");
+            setExperience(data.result.experience ? String(data.result.experience) : "");
+          }
+        }
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
+    fetchProfile();
+  }, [email]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,6 +115,7 @@ const UpdateProfile = () => {
                 placeholder="Enter your name"
                 required
                 className='bg-white'
+                value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
@@ -97,6 +129,7 @@ const UpdateProfile = () => {
                 placeholder="Enter your age"
                 required
                 className='bg-white'
+                value={age}
                 onChange={(e) => setAge(e.target.value)}
               />
             </div>
@@ -128,6 +161,7 @@ const UpdateProfile = () => {
                 placeholder="Enter your height"
                 required
                 className='bg-white'
+                value={height}
                 onChange={(e) => setHeight(e.target.value)}
               />
             </div>
@@ -141,6 +175,7 @@ const UpdateProfile = () => {
                 placeholder="Enter your weight"
                 required
                 className='bg-white'
+                value={weight}
                 onChange={(e) => setWeight(e.target.value)}
               />
             </div>
@@ -154,6 +189,7 @@ const UpdateProfile = () => {
                 placeholder="Enter your email"
                 required
                 className='bg-white'
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div> */}
@@ -167,6 +203,7 @@ const UpdateProfile = () => {
                 placeholder="Enter your address"
                 required
                 className='bg-white'
+                value={address}
                 onChange={(e) => setAddress(e.target.value)}
               />
             </div>
@@ -179,8 +216,9 @@ const UpdateProfile = () => {
                 id="phone"
                 placeholder="Enter your phone number"
                 required
-                onChange={(e) => setPhone(e.target.value)}
                 className='bg-white'
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </div>
 
@@ -188,7 +226,7 @@ const UpdateProfile = () => {
             <div>
               <Label>User Type</Label>
               <RadioGroup
-                defaultValue="general"
+                value={userType}
                 onValueChange={(value) => setUserType(value)}
                 className="flex space-x-4"
               >
@@ -214,6 +252,7 @@ const UpdateProfile = () => {
                     id="designation"
                     placeholder="Enter your designation"
                     className='bg-white'
+                    value={designation}
                     onChange={(e) => setDesignation(e.target.value)}
                   />
                 </div>
@@ -225,6 +264,7 @@ const UpdateProfile = () => {
                     id="experience"
                     placeholder="Enter your experience"
                     className='bg-white'
+                    value={experience}
                     onChange={(e) => setExperience(e.target.value)}
                   />
                 </div>
