@@ -28,8 +28,32 @@ const Workout = () => {
   const [bodyPart, setBodyPart] = useState("chest");
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Store utterances for control
+  const utterancesRef = React.useRef([]);
+  const timeoutsRef = React.useRef([]); // Track all timeouts
 
   useEffect(() => {
+    async function fetchProfile() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/profile/${email}`);
+        const data = await res.json();
+        if (data.result) {
+          setProfile(data.result);
+        }
+      } catch (err) {
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (email) fetchProfile();
+
     const getExercises = async () => {
       if (!bodyPart) return;
 
@@ -42,7 +66,7 @@ const Workout = () => {
     };
 
     getExercises();
-  }, [bodyPart]);
+  }, [email, bodyPart]);
 
   const handleCardClick = (exercise) => {
     setSelectedExercise(exercise);
@@ -53,6 +77,9 @@ const Workout = () => {
     if ("speechSynthesis" in window) {
       const speech = new SpeechSynthesisUtterance(text);
       speech.rate = 0.7;
+      speech.onstart = () => setIsSpeaking(true);
+      speech.onend = () => setIsSpeaking(false);
+      utterancesRef.current.push(speech);
       window.speechSynthesis.speak(speech);
     } else {
       alert("Sorry, your browser does not support text-to-speech!");
@@ -60,16 +87,48 @@ const Workout = () => {
   };
 
   const speakInstructionsWithDelay = (instructions) => {
+    window.speechSynthesis.cancel();
+    utterancesRef.current = [];
+    // Clear previous timeouts
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
+
     instructions.forEach((instruction, index) => {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         textToSpeech(instruction);
       }, index * 3000);
+      timeoutsRef.current.push(timeoutId);
     });
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const handlePauseSpeech = () => {
+    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+      window.speechSynthesis.pause();
+      setIsPaused(true);
+    }
+  };
+
+  const handleResumeSpeech = () => {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      setIsPaused(false);
+    }
+  };
+
+  const handleStopSpeech = () => {
     window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setIsPaused(false);
+    // Clear all queued timeouts
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
+  };
+
+  const handleCloseDialog = (open) => {
+    if (!open) {
+      setOpenDialog(false);
+      handleStopSpeech();
+    }
   };
 
   return (
@@ -81,7 +140,7 @@ const Workout = () => {
           <main>
             <div className="p-8">
               <h1 className="text-3xl font-bold mb-4">
-                Workout Plan for John Doe
+                Workout Plan for {loading ? "" : profile?.name || "User"}
               </h1>
 
               {/* Select Body Part */}
@@ -117,7 +176,7 @@ const Workout = () => {
                   {exercises.map((exercise) => (
                     <div
                       key={exercise.id}
-                      className="p-4 bg-gray-100 rounded-md shadow-md cursor-pointer"
+                      className="p-4 bg-white rounded-xl shadow-md cursor-pointer"
                       onClick={() => handleCardClick(exercise)}
                     >
                       <img
@@ -142,7 +201,7 @@ const Workout = () => {
                   ))}
                 </div>
               ) : (
-                <p>No exercises found for {bodyPart}.</p>
+                <p className="text-4xl">Loading exercises for {bodyPart}...</p>
               )}
             </div>
           </main>
@@ -176,8 +235,7 @@ const Workout = () => {
                       Equipment: {selectedExercise.equipment}
                     </p>
                   </div>
-
-                  <div className="mr-4">
+                  <div className="flex gap-2 items-center mr-4">
                     <Volume2
                       className="cursor-pointer"
                       onClick={() =>
@@ -186,6 +244,30 @@ const Workout = () => {
                         )
                       }
                     />
+                    {isSpeaking && !isPaused && (
+                      <button
+                        className="bg-gray-200 px-2 py-1 rounded text-xs"
+                        onClick={handlePauseSpeech}
+                      >
+                        Pause
+                      </button>
+                    )}
+                    {isSpeaking && isPaused && (
+                      <button
+                        className="bg-gray-200 px-2 py-1 rounded text-xs"
+                        onClick={handleResumeSpeech}
+                      >
+                        Resume
+                      </button>
+                    )}
+                    {isSpeaking && (
+                      <button
+                        className="bg-gray-200 px-2 py-1 rounded text-xs"
+                        onClick={handleStopSpeech}
+                      >
+                        Stop
+                      </button>
+                    )}
                   </div>
                 </div>
 

@@ -5,14 +5,210 @@ import ProfileNavbar from "../_components/ProfileNavbar";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 import { useParams } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const daily = [
-  { src: "/sleeping.png", title: "Sleep", desc: "8 hrs last night" },
-  { src: "/feet.png", title: "Steps", desc: "4619 Steps" },
-  { src: "/food.png", title: "Food", desc: "150 kCal" },
-  { src: "/heart.png", title: "Heart", desc: "120/60 BPM" },
+// Constants
+const DAILY_METRICS = [
+  { src: "/sleeping.png", title: "Sleep", desc: "8 hrs last night", color: "from-blue-500 to-blue-600" },
+  { src: "/feet.png", title: "Steps", desc: "4619 Steps", color: "from-green-500 to-green-600" },
+  { src: "/food.png", title: "Food", desc: "150 kCal", color: "from-orange-500 to-orange-600" },
+  { src: "/heart.png", title: "Heart", desc: "120/60 BPM", color: "from-red-500 to-red-600" },
 ];
 
+const FITNESS_ACTIVITIES = [
+  { src: "/metabolism.png", title: "Fat Burning", progress: 65, current: 65, target: 100, unit: "%" },
+  { src: "/sleeping.png", title: "Sleeping", progress: 65, current: 6.5, target: 8, unit: "hrs" },
+  { src: "/cycling.png", title: "Cycling", progress: 80, current: 24, target: 30, unit: "km", timeLeft: "1 Day Left" },
+];
+
+// Sub-components
+const WelcomeSection = ({ loading, profile }) => (
+  <div className="mb-8">
+    <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+      Hey, {loading ? "Loading..." : profile?.name || "User"} 👋
+    </h1>
+    <p className="text-sm md:text-base text-gray-600 mt-2">
+      {loading ? "Fetching your details..." : "Here is your daily activity and reports"}
+    </p>
+  </div>
+);
+
+const DailyMetricCard = ({ item }) => (
+  <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105">
+    <CardContent className="p-4 md:p-6">
+      <div className="flex items-center gap-4">
+        <div className={`p-3 rounded-xl bg-gradient-to-br ${item.color}`}>
+          <Image src={item.src} alt={item.title} width={32} height={32} className="filter brightness-0 invert" />
+        </div>
+        <div>
+          <h3 className="text-lg md:text-xl font-semibold text-gray-900">{item.title}</h3>
+          <p className="text-sm text-gray-600">{item.desc}</p>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const DailyMetricsGrid = () => (
+  <section className="mb-8 md:mb-12">
+    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6">Daily Metrics</h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      {DAILY_METRICS.map((item, index) => (
+        <DailyMetricCard key={index} item={item} />
+      ))}
+    </div>
+  </section>
+);
+
+const ProfileCard = ({ loading, profile }) => (
+  <Card className="h-full">
+    <CardContent className="p-4 md:p-6 text-center">
+      <div className="flex flex-col items-center">
+        <div className="rounded-full overflow-hidden border-4 border-gray-100 mb-4">
+          <Image 
+            src={"/user.png"} 
+            alt="profile" 
+            width={80} 
+            height={80} 
+            className="object-cover"
+          />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">
+          {loading ? "Loading..." : profile?.name || "User"}
+        </h2>
+        <p className="text-sm text-gray-600 mb-4">
+          {loading ? "" : profile?.userType === "trainer" ? "Fitness Trainer" : profile?.userType || "User"}
+        </p>
+        
+        {profile && (
+          <div className="space-y-2 text-left w-full">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500">Email:</span>
+              <span className="text-gray-900">{profile.email}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500">Age:</span>
+              <span className="text-gray-900">{profile.age}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500">Gender:</span>
+              <span className="text-gray-900 capitalize">{profile.gender}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500">Height:</span>
+              <span className="text-gray-900">{profile.height} cm</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500">Weight:</span>
+              <span className="text-gray-900">{profile.weight} kg</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const ActivityCard = ({ activity }) => (
+  <Card className="h-full hover:shadow-lg transition-all duration-300">
+    <CardContent className="p-4 md:p-6">
+      <div className="flex items-center gap-4 mb-4">
+        <div className="p-2 bg-blue-50 rounded-lg">
+          <Image src={activity.src} alt={activity.title} width={24} height={24} />
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900">{activity.title}</h3>
+          <p className="text-sm text-gray-600">
+            {activity.current}/{activity.target} {activity.unit}
+          </p>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <div className="flex justify-between text-xs">
+          <span className="text-gray-600">Progress</span>
+          <span className="text-blue-600">{activity.progress}%</span>
+        </div>
+        <Progress value={activity.progress} className="h-2" />
+        
+        {activity.timeLeft && (
+          <div className="flex justify-between items-center mt-3">
+            <span className="text-xs text-gray-600">
+              {activity.current} / {activity.target} {activity.unit}
+            </span>
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+              {activity.timeLeft}
+            </span>
+          </div>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const FitnessActivitySection = () => (
+  <Card className="h-full">
+    <CardHeader>
+      <CardTitle className="text-xl">Fitness Activity</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="h-48 flex items-center justify-center">
+        <p className="text-gray-500 text-center">
+          Activity chart will be displayed here
+        </p>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const SleepAnalysisCard = () => (
+  <Card className="h-full">
+    <CardContent className="p-4 md:p-6">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold mb-2">Sleep Analysis</h3>
+        <div className="h-24 flex items-center justify-center">
+          <p className="text-gray-500">Sleep quality chart</p>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const MainContentGrid = ({ loading, profile }) => (
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
+    {/* Sleep Analysis */}
+    <div className="lg:col-span-1">
+      <SleepAnalysisCard />
+    </div>
+    
+    {/* Fitness Activity */}
+    <div className="lg:col-span-1">
+      <FitnessActivitySection />
+    </div>
+    
+    {/* Profile Card */}
+    <div className="lg:col-span-1">
+      <ProfileCard loading={loading} profile={profile} />
+    </div>
+  </div>
+);
+
+const ActivityMetricsGrid = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+    {FITNESS_ACTIVITIES.map((activity, index) => (
+      <ActivityCard key={index} activity={activity} />
+    ))}
+    
+    {/* Empty card for future metrics */}
+    <Card className="h-full border-dashed">
+      <CardContent className="p-6 flex items-center justify-center h-full">
+        <p className="text-gray-400 text-center">Additional metrics</p>
+      </CardContent>
+    </Card>
+  </div>
+);
+
+// Main Dashboard Component
 const Dashboard = () => {
   const params = useParams();
   const email = params?.email;
@@ -38,148 +234,27 @@ const Dashboard = () => {
   }, [email]);
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <section className="w-[77vw] absolute left-[23vw]">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
+      {/* Sidebar - Hidden on mobile, shown on desktop */}
+      <div className="hidden lg:block">
+        <Sidebar />
+      </div>
+      
+      {/* Mobile menu indicator */}
+      <div className="lg:hidden p-4 bg-white border-b">
+        <p className="text-sm text-gray-600">Use the menu icon to navigate</p>
+      </div>
+
+      {/* Main Content Area */}
+      <section className="flex-1 lg:ml-64">
         <ProfileNavbar />
-        <main className="px-10 py-8 w-[77vw] h-screen">
-          <div>
-            <h1 className="text-4xl font-semibold">
-              Hey, {loading ? "Loading..." : profile?.name || "User"}
-            </h1>
-            <h3 className="text-md font-light text-slate-500">
-              {loading
-                ? "Fetching your details..."
-                : "Here is your daily activity and reports"}
-            </h3>
-          </div>
-
-          <div className="daily-tasks my-10 w-full h-1/5">
-            <h1 className="text-3xl tracking-tighter">Daily Task</h1>
-            <div className="flex w-full h-full gap-6 my-4 justify-between items-center">
-              {daily.map((item, index) => {
-                return (
-                  <div
-                    key={index}
-                    className="card flex gap-6 items-center justify-around px-10 py-12 w-1/4 h-full rounded-2xl bg-white/70"
-                  >
-                    <div>
-                      <Image src={item.src} alt="" width={40} height={40} />
-                    </div>
-                    <div>
-                      <h1 className="text-2xl font-semibold">{item.title}</h1>
-                      <p>{item.desc}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="big-cards flex gap-4 mt-20 w-full h-1/3">
-            <div className="w-1/4 h-full bg-white/70 rounded-2xl">
-              <div className="flex flex-col justify-center items-center gap-4 px-10 py-4">
-                <h1 className="text-2xl font-semibold">{daily[0].title}</h1>
-                <h3 className="text-lg">{daily[0].desc}</h3>
-                <div className="graph"></div>
-              </div>
-            </div>
-            <div className="w-1/2 h-full bg-white/70 rounded-2xl px-10 py-4">
-              <h1 className="text-xl font-semibold">Fitness Acitivity</h1>
-            </div>
-            <div className="w-1/4 h-full bg-white/70 rounded-2xl px-10 py-4 flex flex-col items-center justify-start">
-              <div className="rounded-full overflow-hidden">
-                <Image src={"/user.png"} alt="profile" width={80} height={80} />
-              </div>
-              <h1 className="text-2xl font-semibold mt-4">
-                {loading ? "Loading..." : profile?.name || "User"}
-              </h1>
-              <h3 className="text-sm font-light ">
-                {loading
-                  ? ""
-                  : profile?.userType === "trainer"
-                  ? "Fitness Trainer"
-                  : profile?.userType || ""}
-              </h3>
-              <div className="mt-2 text-xs text-slate-600">
-                {profile && (
-                  <>
-                    <div>Email: {profile.email}</div>
-                    <div>Age: {profile.age}</div>
-                    <div>Gender: {profile.gender}</div>
-                    <div>Height: {profile.height} cm</div>
-                    <div>Weight: {profile.weight} kg</div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="last-block flex w-full gap-4 h-1/5 mt-5 rounded-2xl">
-            <div className="1 bg-white/70 w-1/4 h-full rounded-2xl">
-              <div className="flex w-full flex-col gap-4 items-center justify-center py-2 px-8">
-                <div className="flex w-full gap-6 items-center justify-start">
-                  <Image
-                    src={"/metabolism.png"}
-                    alt="sleep"
-                    width={40}
-                    height={40}
-                  />
-
-                  <div className="flex flex-col justify-center items-center">
-                    <h1 className="text-xl font-semibold">Fat Burning</h1>
-                    <h3 className="text-md font-thin text-slate-500">
-                      Progress <span className="text-blue-400">65%</span>
-                    </h3>
-                  </div>
-                </div>
-
-                <div className="flex w-full gap-6 items-center justify-start">
-                  <Image
-                    src={daily[0].src}
-                    alt="sleep"
-                    width={40}
-                    height={40}
-                  />
-
-                  <div className="flex flex-col justify-center items-center">
-                    <h1 className="text-xl font-semibold"> Sleeping</h1>
-                    <h1 className="text-md font-thin text-slate-500">
-                      Progress <span className="text-blue-400">65%</span>
-                    </h1>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/70 w-1/4 h-full py-2 px-8 rounded-2xl flex flex-col">
-              <div className="flex items-center justify-start gap-6">
-                <Image src={"/cycling.png"} alt="" width={40} height={40} />
-
-                <div className="flex flex-col justify-center items-start">
-                  <h1 className="text-xl font-semibold">Cycling</h1>
-                  <h1 className="text-sm font-extralight">24km / week</h1>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 my-4 justify-center items-start">
-                <h3 className="text-xs text-slate-600">Progress</h3>
-                <Progress value={28} />
-              </div>
-
-              <div className="flex justify-between items-center">
-                <p className="text-xs text-slate-600">24 / 30 km</p>
-                <div className="w-20 h-6 rounded-2xl justify-center items-center flex text-xs bg-green-200 border-green-400 text-green-600">
-                  1 Day Left
-                </div>
-              </div>
-            </div>
-
-            <div className="3 bg-white/70 w-1/4 h-full rounded-2xl "></div>
-            <div className="4 bg-white/70 w-1/4 h-full rounded-2xl "></div>
-          </div>
+        
+        <main className="p-4 md:p-6 lg:p-8">
+          <WelcomeSection loading={loading} profile={profile} />
+          <DailyMetricsGrid />
+          <MainContentGrid loading={loading} profile={profile} />
+          <ActivityMetricsGrid />
         </main>
-        {/* <Footer /> */}
       </section>
     </div>
   );
