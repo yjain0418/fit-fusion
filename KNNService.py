@@ -7,7 +7,7 @@ from sklearn.neighbors import KNeighborsClassifier
 
 app = Flask(__name__)
 
-df = pd.read_csv(r"./public/HEALTH DATASET.csv")
+df = pd.read_csv(r"./public/HEALTH DATASET.csv", usecols=['age', 'height', 'weight', 'sex', 'waistline', 'health_status'], nrows=100000)
 
 label_encoder = LabelEncoder()
 df['sex'] = label_encoder.fit_transform(df['sex'])
