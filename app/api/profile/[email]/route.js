@@ -43,7 +43,7 @@ export async function PUT(request, { params }) {
         }
 
         const body = await request.json();
-        const { name, age, userType, gender, height, weight, phone, address, coins, reward, designation, experience } = body;
+        const { name, age, userType, gender, height, weight, phone, address, coins, reward, designation, experience, profilePhoto } = body;
         
         if (!age || !userType || !gender || !height || !weight || !phone || !address) {
             return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
@@ -58,8 +58,8 @@ export async function PUT(request, { params }) {
         // Update the profile
         const updatedProfile = await Profile.findOneAndUpdate(
             { email: email },
-            { name, age, userType, gender, height, weight, phone, address, coins, reward, designation, experience },
-            { new: true, runValidators: true } // `new: true` returns the updated document
+            { name, age, userType, gender, height, weight, phone, address, coins, reward, designation, experience, profilePhoto },
+            { new: true, runValidators: true }
         );
 
         if (!updatedProfile) {

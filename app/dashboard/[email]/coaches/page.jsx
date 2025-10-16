@@ -98,7 +98,15 @@ const Coaches = () => {
             </div>
             <div className="flex flex-wrap gap-12 py-8">
               {coaches.map((item, index) => (
-                <Card key={index} user={item} />
+                <Card
+                  key={index}
+                  user={{
+                    ...item,
+                    profilePhoto: item.profilePhoto
+                      ? `/uploads/${item.profilePhoto}`
+                      : "/user.png",
+                  }}
+                />
               ))}
             </div>
             {/* Pagination Buttons */}

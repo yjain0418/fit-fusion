@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -259,6 +258,31 @@ const UpdateProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    const emailFromUrl = window.location.pathname.split("/")[2];
+    if (emailFromUrl) {
+      setFormData((prev) => ({ ...prev, email: emailFromUrl }));
+
+      fetch(`/api/profile/${emailFromUrl}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.result) {
+            setFormData((prev) => ({
+              ...prev,
+              ...data.result,
+              age: data.result.age || "",
+              height: data.result.height || "",
+              weight: data.result.weight || "",
+              experience: data.result.experience || "",
+              coins: data.result.coins || 0,
+              profilePhoto: data.result.profilePhoto || "",
+              profilePhotoFile: null,
+            }));
+          }
+        });
+    }
+  }, []);
+
   const handleUpdate = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -272,12 +296,10 @@ const UpdateProfile = () => {
 
     let photoUrl = formData.profilePhoto;
 
-    // Handle photo upload if a new file is selected
     if (formData.profilePhotoFile) {
       const photoData = new FormData();
       photoData.append("file", formData.profilePhotoFile);
 
-      // Replace with your actual upload endpoint
       const uploadRes = await fetch("/api/upload", {
         method: "POST",
         body: photoData,

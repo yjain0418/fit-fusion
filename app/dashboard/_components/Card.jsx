@@ -7,7 +7,7 @@ const Card = ({ user }) => {
     <div className="w-64 h-auto bg-white/80 rounded-2xl shadow-xl flex flex-col justify-center items-center px-12 py-6 space-y-6">
       {/* Circular Image */}
       <Image
-        src={user.image}
+        src={user.profilePhoto ? user.profilePhoto : "/user.png"}
         alt={user.name}
         width={120}
         height={120}
