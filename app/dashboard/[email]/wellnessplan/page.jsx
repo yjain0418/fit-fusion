@@ -309,6 +309,32 @@ const WellnessPlan = () => {
   const path = usePathname();
   const email = path.split("/")[2];
 
+  // Fetch profile data on mount
+  React.useEffect(() => {
+    if (!email) return;
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(`/api/profile/${email}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.result) {
+            setFormData(prev => ({
+              ...prev,
+              age: data.result.age ? String(data.result.age) : "",
+              height: data.result.height ? String(data.result.height) : "",
+              weight: data.result.weight ? String(data.result.weight) : "",
+              sex: (data.result.gender || "").toLowerCase() === "male" ? "male" :
+                   (data.result.gender || "").toLowerCase() === "female" ? "female" : ""
+            }));
+          }
+        }
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
+    fetchProfile();
+  }, [email]);
+
   const handleUpdate = (field, value) => {
     setFormData(prev => ({
       ...prev,

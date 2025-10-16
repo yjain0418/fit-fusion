@@ -13,39 +13,6 @@ import {
 } from "@/components/ui/select";
 import React, { useState, useEffect } from "react";
 
-// Sample data for coaches
-// const coachesData = [
-//   {
-//     name: "Emily Johnson",
-//     age: 28,
-//     designation: "Doctor",
-//     experience: 5,
-//     image: "/emily.jpeg",
-//   },
-//   {
-//     name: "David Hoggin",
-//     age: 35,
-//     designation: "Trainer",
-//     experience: 12,
-//     image: "/david.jpeg",
-//   },
-//   {
-//     name: "Sarah Jones",
-//     age: 25,
-//     designation: "Nutritionist",
-//     experience: 1,
-//     image: "/sarah.jpeg",
-//   },
-//   {
-//     name: "Michael Smith",
-//     age: 40,
-//     designation: "Psychiatrist",
-//     experience: 15,
-//     image: "/michael.jpeg",
-//   },
-//   // More sample data can be added here...
-// ];
-
 const ITEMS_PER_PAGE = 8;
 
 const Coaches = () => {

@@ -12,7 +12,7 @@ export async function GET(req) {
     const perPage = 9;
 
     try {
-        const query = { userType: 'Trainer' };
+        const query = { userType: 'trainer' };
         if (search) {
             query.designation = new RegExp(search, 'i');
         }
@@ -33,7 +33,7 @@ export async function GET(req) {
             hasNextPage: hasNextPage ? true : false,
         }, { status: 200 });
     } catch (error) {
-        console.error('Error fetching trainers:', error);
+        console.error('Error fetching coaches:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
