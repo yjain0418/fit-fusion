@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Sidebar from "../../_components/Sidebar";
 import ProfileNavbar from "../../_components/ProfileNavbar";
-import { usePathname, useRouter } from "next/navigation";
 import { fetchExercises } from "@/app/api/exercise/route";
 import {
   Select,
@@ -20,17 +20,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Volume2 } from "lucide-react";
+import { Activity } from "lucide-react";
 
 const Workout = () => {
-  const router = useRouter();
-  const email = usePathname().split("/")[2];
+  const params = useParams();
+  const email = params?.email;
+  const [profile, setProfile] = useState(null);
   const [exercises, setExercises] = useState([]);
   const [bodyPart, setBodyPart] = useState("chest");
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Store utterances for control
@@ -38,21 +39,23 @@ const Workout = () => {
   const timeoutsRef = React.useRef([]); // Track all timeouts
 
   useEffect(() => {
-    async function fetchProfile() {
+    async function fetchData() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/profile/${email}`);
-        const data = await res.json();
-        if (data.result) {
-          setProfile(data.result);
+        // Fetch user profile
+        const profileRes = await fetch(`/api/profile/${email}`);
+        const profileData = await profileRes.json();
+        if (profileData.result) {
+          setProfile(profileData.result);
         }
-      } catch (err) {
-        setProfile(null);
+      } catch (error) {
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     }
-    if (email) fetchProfile();
+
+    if (email) fetchData();
 
     const getExercises = async () => {
       if (!bodyPart) return;
@@ -139,13 +142,13 @@ const Workout = () => {
           <ProfileNavbar />
           <main>
             <div className="p-8">
-              <h1 className="text-3xl font-bold mb-4">
-                Workout Plan for {loading ? "" : profile?.name || "User"}
+              <h1 className="text-2xl font-bold mb-6">
+                Exercise Plans for {loading ? "" : profile?.name || "User"}
               </h1>
 
               {/* Select Body Part */}
-              <div className="mb-4">
-                <label className="mr-2 font-lg">Select Body Part:</label>
+              <div className="mb-6">
+                <label className="mr-2 font-medium text-lg">Select Body Part:</label>
                 <Select
                   value={bodyPart}
                   onValueChange={(value) => setBodyPart(value)}
@@ -176,7 +179,7 @@ const Workout = () => {
                   {exercises.map((exercise) => (
                     <div
                       key={exercise.id}
-                      className="p-4 bg-white rounded-xl shadow-md cursor-pointer"
+                      className="p-4 bg-white rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-shadow"
                       onClick={() => handleCardClick(exercise)}
                     >
                       <img
@@ -188,56 +191,58 @@ const Workout = () => {
                           e.target.src = "/path/to/fallback-image.jpg";
                         }}
                       />
-                      <h3 className="font-semibold text-lg mt-2">
+                      <h3 className="font-semibold text-lg mt-2 capitalize">
                         {exercise.name}
                       </h3>
-                      <p className="text-sm text-gray-600">
-                        Target Muscle: {exercise.target}
+                      <p className="text-sm text-gray-600 capitalize">
+                        Target: {exercise.target}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 capitalize">
                         Equipment: {exercise.equipment}
                       </p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-4xl">Loading exercises for {bodyPart}...</p>
+                <div className="text-center py-12">
+                  <Activity className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <p className="text-xl text-gray-600">Loading exercises for {bodyPart}...</p>
+                </div>
               )}
             </div>
           </main>
-          {/* <Footer /> */}
         </section>
       </div>
 
       {/* Dialog for Exercise Details */}
       {selectedExercise && (
         <Dialog open={openDialog} onOpenChange={handleCloseDialog}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{selectedExercise.name}</DialogTitle>
+              <DialogTitle className="text-xl capitalize">{selectedExercise.name}</DialogTitle>
               <DialogDescription>
                 <img
                   src={selectedExercise.gifUrl}
                   alt={selectedExercise.name}
-                  className="w-full h-48 object-cover rounded mb-4"
+                  className="w-full h-64 object-cover rounded mb-4"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = "/path/to/fallback-image.jpg";
                   }}
                 />
 
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-4">
                   <div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 capitalize">
                       Target Muscle: {selectedExercise.target}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 capitalize">
                       Equipment: {selectedExercise.equipment}
                     </p>
                   </div>
-                  <div className="flex gap-2 items-center mr-4">
+                  <div className="flex gap-2 items-center">
                     <Volume2
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:text-blue-600 transition-colors"
                       onClick={() =>
                         speakInstructionsWithDelay(
                           selectedExercise.instructions || []
@@ -246,7 +251,7 @@ const Workout = () => {
                     />
                     {isSpeaking && !isPaused && (
                       <button
-                        className="bg-gray-200 px-2 py-1 rounded text-xs"
+                        className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-xs transition-colors"
                         onClick={handlePauseSpeech}
                       >
                         Pause
@@ -254,7 +259,7 @@ const Workout = () => {
                     )}
                     {isSpeaking && isPaused && (
                       <button
-                        className="bg-gray-200 px-2 py-1 rounded text-xs"
+                        className="bg-blue-200 hover:bg-blue-300 px-3 py-1 rounded text-xs transition-colors"
                         onClick={handleResumeSpeech}
                       >
                         Resume
@@ -262,7 +267,7 @@ const Workout = () => {
                     )}
                     {isSpeaking && (
                       <button
-                        className="bg-gray-200 px-2 py-1 rounded text-xs"
+                        className="bg-red-200 hover:bg-red-300 px-3 py-1 rounded text-xs transition-colors"
                         onClick={handleStopSpeech}
                       >
                         Stop
@@ -272,13 +277,16 @@ const Workout = () => {
                 </div>
 
                 {/* Instructions */}
-                <ul className="mt-4 list-disc pl-5 space-y-2">
-                  {selectedExercise.instructions?.map((instruction, index) => (
-                    <li key={index} className="text-sm text-gray-800">
-                      {instruction}
-                    </li>
-                  ))}
-                </ul>
+                <div className="mt-4">
+                  <h4 className="font-semibold mb-2">Instructions:</h4>
+                  <ul className="list-disc pl-5 space-y-2">
+                    {selectedExercise.instructions?.map((instruction, index) => (
+                      <li key={index} className="text-sm text-gray-800">
+                        {instruction}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
