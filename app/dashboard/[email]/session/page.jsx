@@ -57,8 +57,7 @@ import {
 
 const WorkoutSessionPage = () => {
   const params = useParams();
-  const email = params?.email;
-  const [userId, setUserId] = useState(null);
+  const email = params?.email ? decodeURIComponent(params.email) : null;
   const [profile, setProfile] = useState(null);
   const [recentSessions, setRecentSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -92,8 +91,10 @@ const WorkoutSessionPage = () => {
   });
 
   useEffect(() => {
-    fetchInitialData();
-    fetchCustomWorkouts();
+    if (email) {
+      fetchInitialData();
+      fetchCustomWorkouts();
+    }
   }, [email]);
 
   useEffect(() => {
@@ -111,70 +112,106 @@ const WorkoutSessionPage = () => {
   }, [selectedWorkout]);
 
   const fetchInitialData = async () => {
+    if (!email) {
+      console.log('[SESSION-PAGE] No email available for fetching data');
+      return;
+    }
+
     setLoading(true);
+    
     try {
-      const profileRes = await fetch(`/api/profile/${email}`);
+      const profileRes = await fetch(`/api/profile/${encodeURIComponent(email)}`);
       const profileData = await profileRes.json();
+      
       if (profileData.result) {
+        console.log('[SESSION-PAGE] Profile fetched successfully');
         setProfile(profileData.result);
-        setUserId(profileData.result._id || "507f1f77bcf86cd799439011");
-
-        const currentUserId = profileData.result._id || "507f1f77bcf86cd799439011";
-
-        try {
-          // Fetch recent sessions
-          const sessionsRes = await fetch(
-            `/api/workout-sessions?userId=${currentUserId}&limit=5`
-          );
-          const sessionsData = await sessionsRes.json();
-          if (sessionsData.success) {
-            setRecentSessions(sessionsData.data);
-          }
-
-          // Fetch today's stats
-          const todayRes = await fetch(
-            `/api/workout-sessions?userId=${currentUserId}&today=true`
-          );
-          const todayData = await todayRes.json();
-          if (todayData.success && todayData.todayStats) {
-            setTodayStats(todayData.todayStats);
-          }
-        } catch (sessionError) {
-          console.log("No sessions found yet");
-        }
       } else {
-        setUserId("507f1f77bcf86cd799439011");
+        console.log('[SESSION-PAGE] No profile found, continuing with email only');
+      }
+
+      try {
+        // Fetch recent sessions using email
+        console.log('[SESSION-PAGE] Fetching recent sessions...');
+        const sessionsRes = await fetch(
+          `/api/workout-sessions?userId=${encodeURIComponent(email)}&limit=5`
+        );
+        const sessionsData = await sessionsRes.json();
+        
+        console.log('[SESSION-PAGE] Sessions response:', sessionsData);
+        
+        if (sessionsData.success) {
+          console.log('[SESSION-PAGE] Found', sessionsData.data.length, 'recent sessions');
+          setRecentSessions(sessionsData.data);
+        } else {
+          console.log('[SESSION-PAGE] No sessions found:', sessionsData.error);
+        }
+
+        // Fetch today's stats using email
+        console.log('[SESSION-PAGE] Fetching today stats...');
+        const todayRes = await fetch(
+          `/api/workout-sessions?userId=${encodeURIComponent(email)}&today=true`
+        );
+        const todayData = await todayRes.json();
+        
+        console.log('[SESSION-PAGE] Today stats response:', todayData);
+        
+        if (todayData.success && todayData.todayStats) {
+          console.log('[SESSION-PAGE] Today stats loaded:', todayData.todayStats);
+          setTodayStats(todayData.todayStats);
+        } else {
+          console.log('[SESSION-PAGE] No today stats found');
+        }
+      } catch (sessionError) {
+        console.log('[SESSION-PAGE] Error fetching sessions:', sessionError.message);
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
-      setUserId("507f1f77bcf86cd799439011");
+      console.error('[SESSION-PAGE] Error fetching initial data:', error);
     } finally {
       setLoading(false);
+      console.log('[SESSION-PAGE] Initial data fetch completed');
     }
   };
 
   const fetchCustomWorkouts = async () => {
+    if (!email) {
+      console.log('[SESSION-PAGE] No email available for fetching custom workouts');
+      return;
+    }
+
+    console.log('[SESSION-PAGE] Fetching custom workouts for email:', email);
+    
     try {
-      // Properly encode the email for URL
+      // Use email directly as userId
       const encodedEmail = encodeURIComponent(email);
+      console.log('[SESSION-PAGE] Making request to:', `/api/custom-workouts?userId=${encodedEmail}`);
+      
       const response = await fetch(`/api/custom-workouts?userId=${encodedEmail}`);
       const data = await response.json();
+      
+      console.log('[SESSION-PAGE] Custom workouts response:', data);
+      
       if (data.success) {
+        console.log('[SESSION-PAGE] Found', data.data.length, 'custom workouts');
         setCustomWorkouts(data.data);
+      } else {
+        console.log('[SESSION-PAGE] No custom workouts found:', data.error);
       }
     } catch (error) {
-      console.error('Error fetching custom workouts:', error);
+      console.error('[SESSION-PAGE] Error fetching custom workouts:', error);
     }
   };
 
   const fetchExercisesData = async () => {
     if (!bodyPart) return;
+    console.log('[SESSION-PAGE] Fetching exercises for body part:', bodyPart);
     setExercisesLoading(true);
     try {
       const data = await fetchExercises(bodyPart);
+      console.log('[SESSION-PAGE] Fetched', data?.length || 0, 'exercises');
       setExercises(data || []);
     } catch (error) {
-      console.error("Failed to fetch exercises:", error);
+      console.error('[SESSION-PAGE] Failed to fetch exercises:', error);
     } finally {
       setExercisesLoading(false);
     }
@@ -182,6 +219,8 @@ const WorkoutSessionPage = () => {
 
   // Workout Builder Functions
   const openBuilder = (workout = null) => {
+    console.log('[SESSION-PAGE] Opening workout builder:', workout ? 'Edit mode' : 'Create mode');
+    
     if (workout) {
       setEditingWorkout(workout);
       setWorkoutName(workout.name);
@@ -195,6 +234,7 @@ const WorkoutSessionPage = () => {
   };
 
   const resetBuilder = () => {
+    console.log('[SESSION-PAGE] Resetting workout builder');
     setEditingWorkout(null);
     setWorkoutName("");
     setWorkoutDescription("");
@@ -204,11 +244,13 @@ const WorkoutSessionPage = () => {
   };
 
   const closeBuilder = () => {
+    console.log('[SESSION-PAGE] Closing workout builder');
     setIsBuilderOpen(false);
     resetBuilder();
   };
 
   const addExerciseToWorkout = (exercise) => {
+    console.log('[SESSION-PAGE] Adding exercise to workout:', exercise.name);
     const exerciseWithDefaults = {
       ...exercise,
       duration: 60,
@@ -225,6 +267,7 @@ const WorkoutSessionPage = () => {
   };
 
   const updateExerciseSettings = (customId, field, value) => {
+    console.log('[SESSION-PAGE] Updating exercise settings:', field, value);
     setSelectedExercises(selectedExercises.map(ex => 
       ex.customId === customId ? { ...ex, [field]: parseInt(value) || value } : ex
     ));
@@ -242,10 +285,15 @@ const WorkoutSessionPage = () => {
       return;
     }
 
+    if (!email) {
+      alert("User email not available");
+      return;
+    }
+
     setSaving(true);
     try {
       const workoutPlan = {
-        userId: email, // Keep original email, backend will decode it
+        userId: email, // Use email directly as userId
         name: workoutName,
         description: workoutDescription,
         difficulty,
@@ -377,13 +425,19 @@ const WorkoutSessionPage = () => {
 
   // Add this function to refresh today's stats
   const refreshTodayStats = async () => {
-    if (!userId) return;
+    if (!email) {
+      console.log('[SESSION-PAGE] No email available for refreshing stats');
+      return;
+    }
+    
+    console.log('[SESSION-PAGE] Refreshing today stats for:', email);
     
     try {
       const todayRes = await fetch(
-        `/api/workout-sessions?userId=${userId}&today=true`
+        `/api/workout-sessions?userId=${encodeURIComponent(email)}&today=true`
       );
       const todayData = await todayRes.json();
+      
       if (todayData.success && todayData.todayStats) {
         setTodayStats(todayData.todayStats);
       }
@@ -439,6 +493,24 @@ const WorkoutSessionPage = () => {
     setIsBuilderOpen(true);
   };
 
+  // Add loading check for email
+  if (!email) {
+    return (
+      <div className="flex min-h-screen bg-gray-50">
+        <Sidebar />
+        <main className="flex-1 ml-64">
+          <div className="p-8">
+            <div className="text-center py-12">
+              <Timer className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <p className="text-gray-600">Loading user session...</p>
+              <p className="text-sm text-gray-500 mt-2">Please wait while we determine your identity...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
@@ -455,6 +527,14 @@ const WorkoutSessionPage = () => {
             <p className="text-gray-600">
               Start live sessions, create custom workouts, and track your progress
             </p>
+            {/* Debug info - remove in production */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="text-sm text-yellow-800">
+                  <strong>Debug Info:</strong> User Email: {email}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* FIXED: Main Content Tabs with key prop to force re-render */}
@@ -477,27 +557,22 @@ const WorkoutSessionPage = () => {
             <TabsContent value="session" className="space-y-6">
               {console.log('Rendering session tab, selectedWorkout:', selectedWorkout)}
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-                {/* Active Session - Pass selected workout as prop */}
+                {/* Active Session - Pass email directly as userId */}
                 <div className="xl:col-span-3">
-                  {userId ? (
-                    <WorkoutSession 
-                      userId={userId}
-                      selectedWorkout={selectedWorkout}
-                      onWorkoutComplete={() => {
-                        refreshTodayStats();
-                        fetchInitialData(); // Refresh recent sessions too
-                      }}
-                      onCreateWorkout={handleCreateWorkout} // Add this prop
-                      key={workoutSessionKey}
-                    />
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-600">Loading user data...</p>
-                    </div>
-                  )}
+                  <WorkoutSession 
+                    userId={email} // Pass email directly as userId
+                    selectedWorkout={selectedWorkout}
+                    onWorkoutComplete={() => {
+                      console.log('[SESSION-PAGE] Workout completed, refreshing data');
+                      refreshTodayStats();
+                      fetchInitialData(); // Refresh recent sessions too
+                    }}
+                    onCreateWorkout={handleCreateWorkout} // Add this prop
+                    key={workoutSessionKey}
+                  />
                 </div>
 
-                {/* Session Stats Sidebar - existing code */}
+                {/* Session Stats Sidebar */}
                 <div className="xl:col-span-1 space-y-6">
                   {/* Today's Stats */}
                   <Card>
@@ -551,7 +626,7 @@ const WorkoutSessionPage = () => {
                             >
                               <div>
                                 <p className="font-medium text-sm">
-                                  {session.workoutPlan.planName}
+                                  {session.workoutPlan?.planName || 'Unknown Workout'}
                                 </p>
                                 <p className="text-xs text-gray-600">
                                   {new Date(session.startTime).toLocaleDateString()}
@@ -559,7 +634,7 @@ const WorkoutSessionPage = () => {
                               </div>
                               <div className="text-right">
                                 <p className="text-sm font-medium">
-                                  {formatDuration(session.totalDuration)}
+                                  {formatDuration(session.totalDuration || 0)}
                                 </p>
                                 <Badge
                                   variant={
@@ -657,7 +732,7 @@ const WorkoutSessionPage = () => {
                               <span className="text-xs text-blue-600">Duration</span>
                             </div>
                             <div className="font-semibold text-blue-600">
-                              {formatDuration(workout.totalDuration)}
+                              {formatDuration(workout.totalDuration || 0)}
                             </div>
                           </div>
                           <div className="bg-green-50 p-2 rounded">
@@ -666,7 +741,7 @@ const WorkoutSessionPage = () => {
                               <span className="text-xs text-green-600">Exercises</span>
                             </div>
                             <div className="font-semibold text-green-600">
-                              {workout.exercises.length}
+                              {workout.exercises?.length || 0}
                             </div>
                           </div>
                         </div>

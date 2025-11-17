@@ -28,13 +28,49 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
   const [isResting, setIsResting] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState(null);
   const [totalSessionTime, setTotalSessionTime] = useState(0);
-  const [completedExercises, setCompletedExercises] = useState([]); // Track completed exercises by index
+  const [completedExercises, setCompletedExercises] = useState([]);
   const [sessionStatus, setSessionStatus] = useState('ready');
   const [sessionId, setSessionId] = useState(null);
   const [workoutLoaded, setWorkoutLoaded] = useState(false);
+  const [userEmail, setUserEmail] = useState(null);
   
   const intervalRef = useRef(null);
   const startTimeRef = useRef(null);
+
+  // Extract email from URL path or userId prop
+  useEffect(() => {
+    let email = null;
+    
+    // If userId is already an email, use it directly
+    if (userId && userId.includes('@')) {
+      email = userId;
+      console.log('[WORKOUT-SESSION] userId is already an email:', email);
+    } else {
+      // Try to extract email from URL path
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        console.log('[WORKOUT-SESSION] Current path:', path);
+        
+        // Extract email from path like /dashboard/[email]/workout
+        const pathParts = path.split('/');
+        const emailIndex = pathParts.findIndex(part => part === 'dashboard') + 1;
+        
+        if (emailIndex > 0 && pathParts[emailIndex]) {
+          email = decodeURIComponent(pathParts[emailIndex]);
+          console.log('[WORKOUT-SESSION] Extracted email from path:', email);
+        }
+      }
+    }
+    
+    if (email && email.includes('@')) {
+      setUserEmail(email);
+      console.log('[WORKOUT-SESSION] Set user email:', email);
+    } else {
+      console.warn('[WORKOUT-SESSION] Could not determine user email from userId or path');
+      // Fallback: use userId as is if no email found
+      setUserEmail(userId);
+    }
+  }, [userId]);
 
   // Load workout from props or localStorage on component mount
   useEffect(() => {
@@ -110,7 +146,7 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
         intervalRef.current = null;
       }
     };
-  }, [isActive, timeRemaining, currentExerciseIndex, currentSetIndex, isResting]); // Add dependencies
+  }, [isActive, timeRemaining, currentExerciseIndex, currentSetIndex, isResting]);
 
   // Session time tracker
   useEffect(() => {
@@ -187,7 +223,7 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
     }
     
     // Update existing session instead of creating new one
-    if (sessionId) {
+    if (sessionId && userEmail) {
       try {
         const endTime = new Date();
         const finalDuration = Math.floor((endTime - new Date(sessionStartTime)) / 1000);
@@ -223,6 +259,8 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
       } catch (error) {
         console.error('Error completing workout:', error);
       }
+    } else {
+      console.warn('[WORKOUT-SESSION] Missing sessionId or userEmail for workout completion');
     }
     
     // Clear localStorage when workout is completed
@@ -233,9 +271,14 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
 
   // Generate unique session ID when workout starts
   const createInitialSession = async (newSessionId, startTime) => {
+    if (!userEmail) {
+      console.error('[WORKOUT-SESSION] Cannot create session - no user email available');
+      return;
+    }
+
     try {
       const sessionData = {
-        userId: userId,
+        userId: userEmail, // Use email as userId
         sessionId: newSessionId,
         workoutPlan: {
           planId: currentWorkout._id || `plan_${Date.now()}`,
@@ -254,6 +297,8 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
         startTime: startTime,
         totalDuration: 0,
         totalExercises: currentWorkout.exercises.length,
+        completedExercises: 0,
+        caloriesBurned: 0,
         status: 'active'
       };
 
@@ -276,6 +321,11 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
   };
 
   const startWorkout = () => {
+    if (!userEmail) {
+      console.error('[WORKOUT-SESSION] Cannot start workout - no user email available');
+      return;
+    }
+
     if (sessionStatus === 'ready' || sessionStatus === 'completed') {
       const now = new Date().toISOString();
       const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -317,7 +367,7 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
     setIsActive(false);
     
     // If we have an active session, mark it as completed
-    if (sessionId && (sessionStatus === 'active' || sessionStatus === 'paused')) {
+    if (sessionId && userEmail && (sessionStatus === 'active' || sessionStatus === 'paused')) {
       try {
         const endTime = new Date();
         const totalDuration = Math.floor((endTime - new Date(sessionStartTime)) / 1000);
@@ -481,6 +531,19 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
     );
   }
 
+  // Show loading state while determining user email
+  if (!userEmail) {
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <Timer className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+          <p className="text-gray-600">Loading user session...</p>
+          <p className="text-sm text-gray-500 mt-2">Determining user identity...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Show create workout prompt when no workout is available
   if (!currentWorkout) {
     return (
@@ -518,6 +581,17 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
 
   return (
     <div className="space-y-6">
+      {/* Debug info - remove in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardContent className="p-4">
+            <div className="text-sm text-yellow-800">
+              <strong>Debug Info:</strong> User Email: {userEmail} | Session ID: {sessionId || 'None'}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Workout Header */}
       <Card>
         <CardHeader>
