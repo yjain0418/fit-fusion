@@ -48,12 +48,6 @@ const GoogleFitIntegration = ({ userId }) => {
       bodyFat: 0,
       bmi: 0
     },
-    sleep: {
-      duration: 0,
-      quality: 'No data',
-      bedTime: null,
-      wakeTime: null
-    },
     lastUpdated: null
   });
   const [loading, setLoading] = useState(false);
@@ -199,12 +193,6 @@ const GoogleFitIntegration = ({ userId }) => {
         bodyFat: 0,
         bmi: 0
       },
-      sleep: {
-        duration: 0,
-        quality: 'No data',
-        bedTime: null,
-        wakeTime: null
-      },
       lastUpdated: null
     });
     localStorage.removeItem('googleFitToken');
@@ -315,13 +303,6 @@ const GoogleFitIntegration = ({ userId }) => {
       return defaultValue;
     }
     return `${value}${unit}`;
-  };
-
-  // Helper function to format sleep duration
-  const formatSleepDuration = (duration) => {
-    if (!duration || duration === 0) return '--';
-    if (duration < 1) return `${Math.round(duration * 60)}m`;
-    return `${duration}h`;
   };
 
   return (

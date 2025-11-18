@@ -41,6 +41,8 @@ export const fetchGoogleFitData = async () => {
       console.log('Google Fit token refreshed successfully');
     }
 
+    console.log('Google Fit data fetched successfully:', result.data);
+
     if (result.data && result.data.activity) {
       return {
         steps: result.data.activity.steps || 0,
@@ -48,6 +50,9 @@ export const fetchGoogleFitData = async () => {
         distance: result.data.activity.distance || 0,
         activeMinutes: result.data.activity.activeMinutes || 0,
         heartRate: result.data.heartRate || { current: 0, average: 0 },
+        sleep: result.data.sleep || {duration: 0, quality: 'No data', bedTime: null, wakeTime: null},
+        sleepHistory: result.data.sleepHistory || [],
+        fatBurning: result.data.body.bodyFat || 0,
         lastUpdated: result.data.lastUpdated || new Date().toISOString()
       };
     }
@@ -124,6 +129,11 @@ export const formatFitnessData = (data) => {
       value: `${data.activeMinutes} min`,
       label: 'Active Minutes',
       progress: Math.min((data.activeMinutes / 30) * 100, 100) // 30 min goal
-    }
+    },
+    fatBurning: {
+      value: `${data.fatBurning} %`,
+      label: 'Body Fat Percentage',
+      progress: Math.min((data.fatBurning / 100) * 100, 100) // 100% body fat goal
+    },
   };
 };
