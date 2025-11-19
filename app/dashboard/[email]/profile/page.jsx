@@ -597,7 +597,7 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Add Google Fit Integration Section */}
+          {/* Add Integration Section */}
           <div className="mt-8">
             <GoogleFitIntegration userId={userData?._id} />
           </div>

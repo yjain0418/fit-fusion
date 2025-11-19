@@ -37,13 +37,13 @@ export async function GET(request) {
     });
 
   } catch (error) {
-    console.error('Google Fit API Error:', error);
+    console.error('Google API Error:', error);
     
     const isAuthError = error.code === 401 || error.message.includes('authentication');
     
     return NextResponse.json({
       success: false,
-      error: isAuthError ? 'Authentication failed - please reconnect Google Fit' : 'Failed to fetch Google Fit data',
+      error: isAuthError ? 'Authentication failed - please reconnect to Google' : 'Failed to fetch Google data',
       needsReauth: isAuthError
     }, { status: isAuthError ? 401 : 500 });
   }
@@ -86,10 +86,10 @@ export async function POST(request) {
     });
 
   } catch (error) {
-    console.error('Error fetching specific Google Fit data:', error);
+    console.error('Error fetching specific data:', error);
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch Google Fit data'
+      error: 'Failed to fetch data'
     }, { status: 500 });
   }
 }

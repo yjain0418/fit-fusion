@@ -36,7 +36,7 @@ export async function GET(request) {
             ${error === 'access_denied' ? `
               <div class="info">
                 <h3>This app is in testing mode</h3>
-                <p>Only approved test users can access Google Fit integration.</p>
+                <p>Only approved test users can access google integration.</p>
                 <p>Please contact the developer to add your email as a test user.</p>
               </div>
             ` : ''}
@@ -79,7 +79,7 @@ export async function GET(request) {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Google Fit Connected</title>
+          <title>Google Connected</title>
           <style>
             body { 
               font-family: Arial, sans-serif; 
@@ -103,7 +103,7 @@ export async function GET(request) {
         <body>
           <div class="container">
             <div class="success">✓</div>
-            <h2>Google Fit Connected Successfully!</h2>
+            <h2>Google Connected Successfully!</h2>
             <p>You can now view your real-time fitness data.</p>
             <p><small>This window will close automatically.</small></p>
           </div>

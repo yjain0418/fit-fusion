@@ -35,12 +35,12 @@ ChartJS.register(
   Filler
 );
 
-// Constants - Updated to include Google Fit placeholders
-const FITNESS_ACTIVITIES = [
-  // { src: "/metabolism.png", title: "Fat Burning", progress: 65, current: 65, target: 100, unit: "%" },
-  { src: "/sleeping.png", title: "Sleeping", progress: 65, current: 6.5, target: 8, unit: "hrs" },
-  { src: "/cycling.png", title: "Cycling", progress: 80, current: 24, target: 30, unit: "km", timeLeft: "1 Day Left" },
-];
+// Constants - Updated to include placeholders
+// const FITNESS_ACTIVITIES = [
+//   // { src: "/metabolism.png", title: "Fat Burning", progress: 65, current: 65, target: 100, unit: "%" },
+//   { src: "/sleeping.png", title: "Sleeping", progress: 65, current: 6.5, target: 8, unit: "hrs" },
+//   { src: "/cycling.png", title: "Cycling", progress: 80, current: 24, target: 30, unit: "km", isLive: true },
+// ];
 
 // Sub-components
 const WelcomeSection = ({ loading, profile }) => (
@@ -92,7 +92,7 @@ const DailyMetricsGrid = ({ metrics }) => (
                 <p className="text-xs text-blue-600 mt-1">
                 </p>
               )}
-              {/* Progress bar for Google Fit data */}
+              {/* Progress bar*/}
               {metric.progress !== undefined && metric.progress > 0 && (
                 <div className="mt-2">
                   <Progress value={metric.progress} className="h-1" />
@@ -717,7 +717,7 @@ const SleepAnalysisCard = ({ googleFitData }) => {
               <div className="text-3xl font-bold text-gray-400">--</div>
               <p className="text-sm text-gray-500">No sleep data available</p>
               <p className="text-xs text-gray-400 text-center">
-                Connect Google Fit to view your sleep analysis
+                Connect google to view your sleep analysis
               </p>
             </div>
           )}
@@ -729,7 +729,7 @@ const SleepAnalysisCard = ({ googleFitData }) => {
 
 const MainContentGrid = ({ loading, profile, googleFitData }) => (
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
-    {/* Sleep Analysis with Google Fit data */}
+    {/* Sleep Analysis */}
     <div className="lg:col-span-1">
       <SleepAnalysisCard googleFitData={googleFitData} />
     </div>
@@ -747,40 +747,51 @@ const MainContentGrid = ({ loading, profile, googleFitData }) => (
 );
 
 const ActivityMetricsGrid = ({ googleFitData }) => {
-  // Enhanced fitness activities with Google Fit data
+  // Enhanced fitness activities with google data
   const getEnhancedActivities = () => {
-    let activities = [...FITNESS_ACTIVITIES];
+    // let activities = [...FITNESS_ACTIVITIES];
+    let activities;
     
     if (googleFitData) {
-      // Update or add Google Fit activities
+      // Update or add google activities
       const stepsActivity = {
         src: "/feet.png",
         title: "Daily Steps",
-        progress: googleFitData.activity?.steps > 0 ? Math.round(Math.min((googleFitData.activity.steps / 10000) * 100, 100) * 100) / 100 : 0,
-        current: googleFitData.activity?.steps > 0 ? googleFitData.activity.steps.toLocaleString() : "--",
+        progress: googleFitData?.steps > 0 ? Math.round(Math.min((googleFitData.steps / 10000) * 100, 100) * 100) / 100 : 0,
+        current: googleFitData?.steps > 0 ? googleFitData.steps.toLocaleString() : "--",
         target: "10,000",
         unit: "steps",
-        isLive: googleFitData.activity?.steps > 0
+        isLive: googleFitData?.steps > 0
       };
       
       const caloriesActivity = {
         src: "/food.png",
         title: "Calories Burned",
-        progress: googleFitData.activity?.caloriesBurned > 0 ? Math.round(Math.min((googleFitData.activity.caloriesBurned / 2000) * 100, 100) * 100) / 100 : 0,
-        current: googleFitData.activity?.caloriesBurned > 0 ? googleFitData.activity.caloriesBurned : "--",
+        progress: googleFitData?.calories > 0 ? Math.round(Math.min((googleFitData.calories / 2000) * 100, 100) * 100) / 100 : 0,
+        current: googleFitData?.calories > 0 ? googleFitData.calories : "--",
         target: "2,000",
         unit: "kcal",
-        isLive: googleFitData.activity?.caloriesBurned > 0
+        isLive: googleFitData?.calories > 0
       };
 
       const fatBurning = {
         src: "/metabolism.png",
         title: "Body Fat",
-        progress: googleFitData.body?.bodyFat > 0 ? Math.round(Math.min((googleFitData.body.bodyFat / 100) * 100, 100) * 100) / 100 : 0,
-        current: googleFitData.body?.bodyFat > 0 ? googleFitData.body.bodyFat : "--",
+        progress: googleFitData?.fatBurning > 0 ? Math.round(Math.min((googleFitData.fatBurning/ 100) * 100, 100) * 100) / 100 : 0,
+        current: googleFitData?.fatBurning > 0 ? googleFitData.fatBurning: "--",
         target: "100",
         unit: "%",
-        isLive: googleFitData.body?.bodyFat > 0
+        isLive: googleFitData?.fatBurning > 0
+      };
+
+      const sleeping = {
+        src: "/sleeping.png",
+        title: "Sleeping",
+        progress: googleFitData?.sleep?.duration > 0 ? Math.round(Math.min((googleFitData.sleep.duration/ 8) * 100, 100) * 100) / 100 : 0,
+        current: googleFitData?.sleep?.duration > 0 ? googleFitData.sleep.duration: "--",
+        target: "8",
+        unit: "hrs",
+        isLive: googleFitData?.sleep?.duration > 0
       };
       
       // Replace or add activities
@@ -788,10 +799,10 @@ const ActivityMetricsGrid = ({ googleFitData }) => {
         fatBurning,
         stepsActivity,
         caloriesActivity,
-        ...activities.slice(1) // Keep Cycling
+        sleeping
       ];
     } else {
-      // Show -- for steps and calories when no Google Fit data
+      // Show -- for steps and calories when no data
       const stepsActivity = {
         src: "/feet.png",
         title: "Daily Steps",
@@ -821,12 +832,22 @@ const ActivityMetricsGrid = ({ googleFitData }) => {
         unit: "%",
         isLive: false
       };
+
+      const sleeping = {
+        src: "/sleeping.png",
+        title: "Sleeping",
+        progress: 0,
+        current: "--",
+        target: "8",
+        unit: "hrs",
+        isLive: false
+      };
       
       activities = [
         fatBurning,
         stepsActivity,
         caloriesActivity,
-        ...activities.slice(1) // Keep Cycling
+        sleeping
       ];
     }
     
@@ -859,7 +880,6 @@ const Dashboard = () => {
       const fitData = await fetchGoogleFitData();
       if (fitData) {
         setGoogleFitData(fitData);
-        console.log("Google Fit data loaded:", fitData);
       }
     }
   };
@@ -886,7 +906,7 @@ const Dashboard = () => {
     }
   }, [email]);
 
-  // Create dynamic DAILY_METRICS based on Google Fit data
+  // Create dynamic DAILY_METRICS based on data
   const getDailyMetrics = () => {
     // Get latest sleep data from sleepHistory
     const getLatestSleepDuration = () => {
@@ -902,50 +922,58 @@ const Dashboard = () => {
 
     const sleepDuration = getLatestSleepDuration();
 
-    const baseMetrics = [
-      { 
-        src: "/sleeping.png", 
-        title: "Sleep", 
-        desc: sleepDuration 
-          ? `${sleepDuration}h last night` 
-          : "-- hrs last night", 
-        color: "from-blue-500 to-blue-600",
-        source: sleepDuration ? "Google Fit" : null
-      },
-      { 
-        src: "/heart.png", 
-        title: "Heart Rate", 
-        desc: googleFitData?.heartRate?.current && googleFitData.heartRate.current > 0 
-          ? `${googleFitData.heartRate.current} BPM` 
-          : "-- BPM", 
-        color: "from-red-500 to-red-600",
-        source: googleFitData?.heartRate?.current && googleFitData.heartRate.current > 0 ? "Google Fit" : null
-      },
-    ];
+    // const baseMetrics = [
+    //   { 
+    //     src: "/sleeping.png", 
+    //     title: "Sleep", 
+    //     desc: sleepDuration 
+    //       ? `${sleepDuration}h last night` 
+    //       : "-- hrs last night", 
+    //     color: "from-blue-500 to-blue-600",
+    //   }
+    // ];
 
     if (googleFitConnected && googleFitData) {
       return [
-        ...baseMetrics,
+        { 
+          src: "/sleeping.png", 
+          title: "Sleep", 
+          desc: sleepDuration 
+            ? `${sleepDuration}h last night` 
+            : "-- hrs last night", 
+          color: "from-blue-500 to-blue-600",
+          // source: sleepDuration ? "Google Fit" : null
+        },
+        { 
+          src: "/heart.png", 
+          title: "Heart Rate", 
+          desc: googleFitData?.heartRate?.current && googleFitData.heartRate.current > 0 
+            ? `${googleFitData.heartRate.current} BPM` 
+            : "-- BPM", 
+          color: "from-red-500 to-red-600",
+          // source: googleFitData?.heartRate?.current && googleFitData.heartRate.current > 0 ? "Google Fit" : null
+        },
         { 
           src: "/feet.png", 
           title: "Steps", 
-          desc: googleFitData.activity?.steps > 0 ? `${googleFitData.activity.steps.toLocaleString()} Steps` : "-- Steps", 
+          desc: googleFitData?.steps > 0 ? `${googleFitData.steps.toLocaleString()} Steps` : "-- Steps", 
           color: "from-green-500 to-green-600",
-          source: googleFitData.activity?.steps > 0 ? "Google Fit" : null,
-          progress: googleFitData.activity?.steps > 0 ? Math.min((googleFitData.activity.steps / 10000) * 100, 100) : 0
+          // source: googleFitData?.steps > 0 ? "Google Fit" : null,
+          // progress: googleFitData?.steps > 0 ? Math.min((googleFitData.steps / 10000) * 100, 100) : 0
         },
         { 
           src: "/food.png", 
           title: "Calories", 
-          desc: googleFitData.activity?.caloriesBurned > 0 ? `${googleFitData.activity.caloriesBurned} kCal` : "-- kCal", 
+          desc: googleFitData?.calories > 0 ? `${googleFitData.calories} kCal` : "-- kCal", 
           color: "from-orange-500 to-orange-600",
-          source: googleFitData.activity?.caloriesBurned > 0 ? "Google Fit" : null,
-          progress: googleFitData.activity?.caloriesBurned > 0 ? Math.min((googleFitData.activity.caloriesBurned / 2000) * 100, 100) : 0
+          // source: googleFitData?.calories > 0 ? "Google Fit" : null,
+          // progress: googleFitData?.calories > 0 ? Math.min((googleFitData.calories / 2000) * 100, 100) : 0
         },
       ];
     } else {
       return [
-        ...baseMetrics,
+        { src: "/sleeping.png", title: "Sleep", desc: "-- hrs last night", color: "from-blue-500 to-blue-600" },
+        { src: "/heart.png", title: "Heart Rate", desc: "-- BPM", color: "from-red-500 to-red-600" },
         { src: "/feet.png", title: "Steps", desc: "-- Steps", color: "from-green-500 to-green-600" },
         { src: "/food.png", title: "Calories", desc: "-- kCal", color: "from-orange-500 to-orange-600" },
       ];
@@ -985,13 +1013,13 @@ const Dashboard = () => {
               <Card className="border-yellow-200 bg-yellow-50">
                 <CardContent className="p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4 justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-yellow-900 mb-1">Connect Google Fit</h3>
+                    <h3 className="text-lg font-semibold text-yellow-900 mb-1">Connect to Google</h3>
                     <p className="text-sm text-yellow-800">
-                      Connect Google Fit to display live steps, calories, heart rate and sleep data on your dashboard.
+                      Connect Google to display live steps, calories, heart rate and sleep data on your dashboard.
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={refreshGoogleFitData} title="Refresh Google Fit data">
+                    <Button variant="outline" size="sm" onClick={refreshGoogleFitData} title="Refresh data">
                       <RefreshCw className="mr-2 h-4 w-4" />
                       Refresh
                     </Button>
@@ -1001,7 +1029,7 @@ const Dashboard = () => {
             </div>
           )}
           
-          {/* Updated Daily Metrics with Google Fit data */}
+          {/* Updated Daily Metrics*/}
           <DailyMetricsGrid metrics={getDailyMetrics()} />
           
           <MainContentGrid loading={loading} profile={profile} googleFitData={googleFitData} />

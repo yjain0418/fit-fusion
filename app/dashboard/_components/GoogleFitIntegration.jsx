@@ -55,7 +55,7 @@ const GoogleFitIntegration = ({ userId }) => {
   const [accessToken, setAccessToken] = useState(null);
 
   useEffect(() => {
-    // Check if user is already connected to Google Fit
+    // Check if user is already connected to Google
     const savedToken = localStorage.getItem('googleFitToken');
     const savedConnection = localStorage.getItem('googleFitConnected');
     
@@ -69,7 +69,7 @@ const GoogleFitIntegration = ({ userId }) => {
     // Check for auth errors
     const authError = localStorage.getItem('googleFitError');
     if (authError === 'reconnect_needed' || authError === 'auth_expired') {
-      setError('Your Google Fit connection has expired. Please reconnect to continue seeing live data.');
+      setError('Your connection has expired. Please reconnect to continue seeing live data.');
       localStorage.removeItem('googleFitError');
     }
   }, []);
@@ -80,7 +80,7 @@ const GoogleFitIntegration = ({ userId }) => {
       setError(null);
 
       if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-        setError('Google Fit integration is not configured. Please contact support.');
+        setError('Integration is not configured. Please contact support.');
         return;
       }
 
@@ -164,8 +164,8 @@ const GoogleFitIntegration = ({ userId }) => {
       }, 1000);
 
     } catch (error) {
-      console.error('Error connecting to Google Fit:', error);
-      setError('Failed to connect to Google Fit. Please try again.');
+      console.error('Error connecting to Google:', error);
+      setError('Failed to connect to Google. Please try again.');
       setIsConnecting(false);
     }
   };
@@ -250,7 +250,7 @@ const GoogleFitIntegration = ({ userId }) => {
         if (result.needsReauth) {
           // Token expired, disconnect user
           disconnectFromGoogleFit();
-          setError('Your Google Fit connection has expired. Please reconnect to continue seeing live data.');
+          setError('Your connection has expired. Please reconnect to continue seeing live data.');
         } else {
           setError(result.error || 'Failed to fetch fitness data');
         }
@@ -307,7 +307,7 @@ const GoogleFitIntegration = ({ userId }) => {
 
   return (
     <div className="space-y-6">
-      {/* Google Fit Integration Header */}
+      {/* Integration Header */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -316,8 +316,8 @@ const GoogleFitIntegration = ({ userId }) => {
                 <Activity className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">Google Fit Integration</h3>
-                <p className="text-sm text-gray-600">Connect your Google Fit account for real-time health data</p>
+                <h3 className="text-lg font-semibold">Integration</h3>
+                <p className="text-sm text-gray-600">Connect your google account for real-time health data</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -346,7 +346,7 @@ const GoogleFitIntegration = ({ userId }) => {
                     <Activity className="w-8 h-8 text-blue-600" />
                   </div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                    Connect Google Fit for Better Insights
+                    Connect to Google for Better Insights
                   </h4>
                   <p className="text-gray-600 text-sm">
                     Sync your health data to get personalized workout recommendations and track your progress more accurately.
@@ -361,7 +361,7 @@ const GoogleFitIntegration = ({ userId }) => {
                     className="w-full"
                   >
                     <Link className="w-5 h-5 mr-2" />
-                    {isConnecting ? 'Connecting...' : 'Connect Google Fit'}
+                    {isConnecting ? 'Connecting...' : 'Connect Google Account'}
                   </Button>
                   
                   {error && (
@@ -403,7 +403,7 @@ const GoogleFitIntegration = ({ userId }) => {
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <div>
-                    <p className="text-sm font-medium text-green-800">Google Fit Connected</p>
+                    <p className="text-sm font-medium text-green-800">Google Account Connected</p>
                     <p className="text-xs text-green-600">
                       Last updated: {formatLastUpdated(fitData.lastUpdated)}
                     </p>
@@ -601,7 +601,7 @@ const GoogleFitIntegration = ({ userId }) => {
                     <div className="text-center py-8 text-gray-500">
                       <Heart className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                       <p className="font-medium">No heart rate data available</p>
-                      <p className="text-sm">Make sure your fitness tracker is connected and synced with Google Fit</p>
+                      <p className="text-sm">Make sure your fitness tracker is connected and synced with Google</p>
                     </div>
                   )}
                 </TabsContent>
@@ -705,7 +705,7 @@ const GoogleFitIntegration = ({ userId }) => {
                     <div className="text-center py-8 text-gray-500">
                       <Scale className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                       <p className="font-medium">No body metrics data available</p>
-                      <p className="text-sm">Connect a smart scale or manually log your data in Google Fit to see body metrics here</p>
+                      <p className="text-sm">Connect a smart scale or manually log your data in Google to see body metrics here</p>
                     </div>
                   )}
                 </TabsContent>

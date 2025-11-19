@@ -29,19 +29,17 @@ export const fetchGoogleFitData = async () => {
         localStorage.removeItem('googleFitRefreshToken');
         localStorage.removeItem('googleFitConnected');
         localStorage.setItem('googleFitError', 'reconnect_needed');
-        console.log('Google Fit authentication expired - reconnection needed');
+        console.log('Google authentication expired - reconnection needed');
         return null;
       }
-      throw new Error(result.error || 'Failed to fetch Google Fit data');
+      throw new Error(result.error || 'Failed to fetch data');
     }
 
     // Update token if it was refreshed
     if (result.newAccessToken) {
       localStorage.setItem('googleFitToken', result.newAccessToken);
-      console.log('Google Fit token refreshed successfully');
+      console.log('Google token refreshed successfully');
     }
-
-    console.log('Google Fit data fetched successfully:', result.data);
 
     if (result.data && result.data.activity) {
       return {
@@ -59,7 +57,7 @@ export const fetchGoogleFitData = async () => {
 
     return null;
   } catch (error) {
-    console.error('Error fetching Google Fit data:', error);
+    console.error('Error fetching data:', error);
     
     // Check if it's an auth error
     if (error.message.includes('Authentication') || error.message.includes('401')) {
@@ -70,17 +68,17 @@ export const fetchGoogleFitData = async () => {
   }
 };
 
-// Helper function to check if Google Fit is connected
+// Helper function to check if Google is connected
 export const isGoogleFitConnected = () => {
   return localStorage.getItem('googleFitConnected') === 'true';
 };
 
-// Helper function to get stored Google Fit token
+// Helper function to get stored Google token
 export const getGoogleFitToken = () => {
   return localStorage.getItem('googleFitToken');
 };
 
-// Helper function to disconnect Google Fit
+// Helper function to disconnect Google
 export const disconnectGoogleFit = () => {
   localStorage.removeItem('googleFitToken');
   localStorage.removeItem('googleFitRefreshToken');
@@ -98,7 +96,7 @@ export const checkGoogleFitAuthStatus = () => {
     localStorage.removeItem('googleFitError');
     return {
       needsReconnect: true,
-      message: 'Your Google Fit connection has expired. Please reconnect to continue seeing live data.'
+      message: 'Your Google connection has expired. Please reconnect to continue seeing live data.'
     };
   }
   
