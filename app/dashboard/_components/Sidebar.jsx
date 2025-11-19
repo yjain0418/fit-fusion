@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 // Components
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 // Constants
 const SIDEBAR_OPTIONS = [
@@ -14,7 +15,8 @@ const SIDEBAR_OPTIONS = [
   { name: "Nutritioner and Coaches", path: "/coaches", icon: "/coach.png" },
   { name: "Community", path: "/community", icon: "/community.png" },
   { name: "Workout Plans", path: "/workout", icon: "/workout.png" },
-  { name: "BMI Calculator", path: "/wellnessplan", icon: "/bmi.png" },
+  { name: "Workout Session", path: "/session", icon: "/workout.png", isLive: true },
+  { name: "Wellness Checker", path: "/wellnessplan", icon: "/bmi.png" },
 ];
 
 // Sub-components
@@ -34,7 +36,7 @@ const LogoSection = ({ email, router }) => (
 
 const NavigationItem = ({ item, isActive, onClick }) => (
   <div
-    className={`flex items-center gap-3 cursor-pointer px-2 py-2 rounded-xl transition-all duration-200 group ${
+    className={`flex items-center gap-3 cursor-pointer px-2 py-2 rounded-xl transition-all duration-200 group relative ${
       isActive 
         ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg" 
         : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
@@ -50,8 +52,23 @@ const NavigationItem = ({ item, isActive, onClick }) => (
         className={`transition-transform group-hover:scale-110`}
       />
     )}
-    <span className="font-medium text-xl">{item.name}</span>
-    {isActive && (
+    <span className="font-medium text-xl flex-1">{item.name}</span>
+    
+    {/* Live Badge for Workout Session */}
+    {item.isLive && (
+      <Badge 
+        variant={isActive ? "secondary" : "default"}
+        className={`text-xs px-2 py-1 ml-2 ${
+          isActive 
+            ? "bg-white text-red-600" 
+            : "bg-green-100 text-green-600 animate-pulse"
+        }`}
+      >
+        LIVE
+      </Badge>
+    )}
+    
+    {isActive && !item.isLive && (
       <div className="ml-auto w-2 h-2 bg-white rounded-full" />
     )}
   </div>

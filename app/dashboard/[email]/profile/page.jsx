@@ -23,10 +23,13 @@ import {
   Dumbbell,
   Heart,
   Clock,
-  Flame
+  Flame,
+  TrendingDown,
+  AlertCircle  // Add this import
 } from "lucide-react";
 import Sidebar from "../../_components/Sidebar";
 import ProfileNavbar from "../../_components/ProfileNavbar";
+import GoogleFitIntegration from '@/app/dashboard/_components/GoogleFitIntegration';
 
 // Sub-components
 const ProfileHeader = ({ ratio, onUpdateClick, userName }) => (
@@ -251,12 +254,134 @@ const BadgesCard = () => {
   );
 };
 
-const WorkoutDataCard = () => {
+const WorkoutDataCard = ({ email }) => {
+  const [workoutStats, setWorkoutStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isFallback, setIsFallback] = useState(false);
+
+  useEffect(() => {
+    const fetchWorkoutStats = async () => {
+      if (!email) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Add timeout to the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+        
+        const response = await fetch(`/api/workout-stats/${email}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        const result = await response.json();
+
+        if (result.success) {
+          setWorkoutStats(result.data);
+          setIsFallback(result.fallback || false);
+          if (result.fallback) {
+            setError(result.message);
+          }
+        } else {
+          setError(result.message || 'Failed to fetch workout stats');
+        }
+      } catch (error) {
+        console.error('Error fetching workout stats:', error);
+        
+        if (error.name === 'AbortError') {
+          setError('Request timed out - using offline mode');
+          // Set fallback data
+          setWorkoutStats({
+            thisWeek: { workouts: 0, activeMinutes: 0, calories: 0, streak: 0 },
+            changes: { workouts: "+0", activeMinutes: "+0", calories: "+0", streak: "+0" },
+            progress: { weeklyGoal: 0, monthlyGoal: 0, monthlyProgress: "0/20" },
+            nextWorkout: { date: "Tomorrow", time: "7:00 AM", type: "Start your routine" }
+          });
+          setIsFallback(true);
+        } else {
+          setError('Failed to load workout data');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkoutStats();
+  }, [email]);
+
+  // Format calories display
+  const formatCalories = (calories) => {
+    if (calories >= 1000) {
+      return `${(calories / 1000).toFixed(1)}k`;
+    }
+    return calories.toString();
+  };
+
+  // Format active minutes display
+  const formatActiveMinutes = (minutes) => {
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+    }
+    return `${minutes}m`;
+  };
+
+  if (loading) {
+    return (
+      <Card className="">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Activity className="w-5 h-5 text-green-600" />
+            Fitness Stats
+          </CardTitle>
+          <CardDescription>Loading workout data...</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const stats = [
-    { label: "Workouts", value: "5", change: "+2", positive: true, icon: Dumbbell, color: "text-blue-600" },
-    { label: "Active Minutes", value: "240", change: "+45", positive: true, icon: Clock, color: "text-green-600" },
-    { label: "Calories", value: "1.2k", change: "+320", positive: true, icon: Flame, color: "text-orange-600" },
-    { label: "Current Streak", value: "7", change: "+3", positive: true, icon: Heart, color: "text-red-600" },
+    { 
+      label: "Workouts", 
+      value: workoutStats?.thisWeek?.workouts?.toString() || "0", 
+      change: workoutStats?.changes?.workouts || "+0", 
+      positive: !workoutStats?.changes?.workouts?.startsWith('-'), 
+      icon: Dumbbell, 
+      color: "text-blue-600" 
+    },
+    { 
+      label: "Active Minutes", 
+      value: workoutStats?.thisWeek?.activeMinutes ? formatActiveMinutes(workoutStats.thisWeek.activeMinutes) : "0m", 
+      change: workoutStats?.changes?.activeMinutes || "+0", 
+      positive: !workoutStats?.changes?.activeMinutes?.startsWith('-'), 
+      icon: Clock, 
+      color: "text-green-600" 
+    },
+    { 
+      label: "Calories", 
+      value: workoutStats?.thisWeek?.calories ? formatCalories(workoutStats.thisWeek.calories) : "0", 
+      change: workoutStats?.changes?.calories || "+0", 
+      positive: !workoutStats?.changes?.calories?.startsWith('-'), 
+      icon: Flame, 
+      color: "text-orange-600" 
+    },
+    { 
+      label: "Current Streak", 
+      value: workoutStats?.thisWeek?.streak?.toString() || "0", 
+      change: workoutStats?.changes?.streak || "+0", 
+      positive: !workoutStats?.changes?.streak?.startsWith('-'), 
+      icon: Heart, 
+      color: "text-red-600" 
+    },
   ];
 
   return (
@@ -265,12 +390,29 @@ const WorkoutDataCard = () => {
         <CardTitle className="flex items-center gap-2 text-lg">
           <Activity className="w-5 h-5 text-green-600" />
           Fitness Stats
+          {isFallback && (
+            <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
+              Offline
+            </Badge>
+          )}
         </CardTitle>
         <CardDescription>
           This week's performance
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
+        {/* Show connection warning if using fallback data */}
+        {(error || isFallback) && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-center gap-2 text-yellow-800">
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-sm">
+                {error || "Using offline data due to connection issues"}
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3 mb-4">
           {stats.map((stat, index) => (
             <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
@@ -282,7 +424,7 @@ const WorkoutDataCard = () => {
               <div className={`flex items-center justify-center gap-1 text-xs ${
                 stat.positive ? 'text-green-600' : 'text-red-600'
               }`}>
-                <TrendingUp className="w-3 h-3" />
+                {stat.positive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {stat.change}
               </div>
             </div>
@@ -293,29 +435,52 @@ const WorkoutDataCard = () => {
           <div>
             <div className="flex justify-between items-center mb-1">
               <span className="text-sm font-medium text-gray-700">Weekly Goal</span>
-              <span className="text-sm text-gray-600">80%</span>
+              <span className="text-sm text-gray-600">{workoutStats?.progress?.weeklyGoal || 0}%</span>
             </div>
-            <Progress value={80} className="h-2" />
+            <Progress value={workoutStats?.progress?.weeklyGoal || 0} className="h-2" />
           </div>
           
           <div>
             <div className="flex justify-between items-center mb-1">
               <span className="text-sm font-medium text-gray-700">Monthly Challenge</span>
-              <span className="text-sm text-gray-600">12/20</span>
+              <span className="text-sm text-gray-600">{workoutStats?.progress?.monthlyProgress || "0/20"}</span>
             </div>
-            <Progress value={60} className="h-2" />
+            <Progress value={workoutStats?.progress?.monthlyGoal || 0} className="h-2" />
           </div>
         </div>
 
-        <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+        {/* <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-green-600" />
             <div>
               <p className="text-sm font-semibold text-green-800">Next Workout</p>
-              <p className="text-xs text-green-700">Tomorrow • 7:00 AM • Cardio</p>
+              <p className="text-xs text-green-700">
+                {workoutStats?.nextWorkout ? 
+                  `${workoutStats.nextWorkout.date} • ${workoutStats.nextWorkout.time} • ${workoutStats.nextWorkout.type}` :
+                  "No scheduled workouts"
+                }
+              </p>
             </div>
           </div>
-        </div>
+        </div> */}
+
+        {/* Show empty state if no workouts and not fallback */}
+        {(!workoutStats?.thisWeek?.workouts || workoutStats.thisWeek.workouts === 0) && !isFallback && (
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 text-center">
+            <Dumbbell className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+            <p className="text-sm font-medium text-blue-800">Start Your Fitness Journey!</p>
+            <p className="text-xs text-blue-700">Complete your first workout to see your stats here</p>
+          </div>
+        )}
+
+        {/* Show getting started message for fallback with no data */}
+        {isFallback && (!workoutStats?.thisWeek?.workouts || workoutStats.thisWeek.workouts === 0) && (
+          <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200 text-center">
+            <Activity className="w-8 h-8 mx-auto mb-2 text-orange-600" />
+            <p className="text-sm font-medium text-orange-800">Connection Issues</p>
+            <p className="text-xs text-orange-700">Your real stats will appear when connection is restored</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -428,8 +593,13 @@ const ProfilePage = () => {
             {/* Sidebar Cards - Takes 1 column */}
             <div className="space-y-6">
               <BadgesCard />
-              <WorkoutDataCard />
+              <WorkoutDataCard email={email} />
             </div>
+          </div>
+
+          {/* Add Integration Section */}
+          <div className="mt-8">
+            <GoogleFitIntegration userId={userData?._id} />
           </div>
         </main>
       </section>

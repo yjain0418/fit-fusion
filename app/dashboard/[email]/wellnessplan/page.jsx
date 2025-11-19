@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2, ArrowLeft, Heart, Scale, Ruler, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Footer from "@/app/_components/Footer";
 import Sidebar from "../../_components/Sidebar";
+import { fetchGoogleFitData } from '@/utils/googleFitUtils';
 
 // BMIScaleBar Component (same as before)
 const BMIScaleBar = ({ bmi, bmiCategory }) => {
@@ -95,10 +96,10 @@ const PersonalDetailsForm = ({ formData, onUpdate, onSubmit, loading }) => {
     <Card className="w-full max-w-2xl">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-bold text-gray-900">
-          BMI Calculator
+          Wellness Checker
         </CardTitle>
         <CardDescription className="text-lg text-gray-600">
-          Enter your details to calculate your Body Mass Index
+          Enter your details to know your health status
         </CardDescription>
       </CardHeader>
       
@@ -201,7 +202,7 @@ const PersonalDetailsForm = ({ formData, onUpdate, onSubmit, loading }) => {
                 Calculating...
               </>
             ) : (
-              'Calculate BMI'
+              'Calculate Health Status'
             )}
           </Button>
         </div>
@@ -211,7 +212,7 @@ const PersonalDetailsForm = ({ formData, onUpdate, onSubmit, loading }) => {
 };
 
 // ResultsView Component (same as before)
-const ResultsView = ({ bmi, bmiCategory, healthStatus, onBack, onGetPlan, email, router }) => {
+const ResultsView = ({ bmi, bmiCategory, healthStatus, onBack, onGetPlan, email, router, googleFitData }) => {
   const isHealthy = healthStatus === "The person is healthy. Cheers to good health";
 
   return (
@@ -232,7 +233,7 @@ const ResultsView = ({ bmi, bmiCategory, healthStatus, onBack, onGetPlan, email,
                 Your Health Report
               </CardTitle>
               <CardDescription className="text-lg text-gray-600">
-                Complete analysis of your BMI and health status
+                Complete analysis of your health status
               </CardDescription>
             </div>
           </div>
@@ -241,6 +242,57 @@ const ResultsView = ({ bmi, bmiCategory, healthStatus, onBack, onGetPlan, email,
 
       <BMIScaleBar bmi={bmi} bmiCategory={bmiCategory} />
 
+      {/* NEW: Health Metrics summary from Google Fit */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Other Health Metrics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <p className="text-xs text-gray-500">Steps (today)</p>
+              <p className="font-semibold text-gray-900">{googleFitData?.steps ? googleFitData.steps.toLocaleString() : '--'}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-gray-500">Calories</p>
+              <p className="font-semibold text-gray-900">{googleFitData?.calories ?? '--'} kcal</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-gray-500">Resting HR</p>
+              <p className="font-semibold text-gray-900">{googleFitData?.heartRate?.current ?? '--'} BPM</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-gray-500">Last Night Sleep</p>
+              <p className="font-semibold text-gray-900">
+                {googleFitData?.sleepHistory?.[0]?.durationHours ? `${googleFitData.sleepHistory[0].durationHours}h` : '--'}
+              </p>
+            </div>
+          </div>
+
+          {/* optional nutrition block if present */}
+          {googleFitData?.nutrition && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-600 mb-2">Nutrition (today)</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center">
+                  <p className="text-xs text-gray-500">Calories</p>
+                  <p className="font-semibold text-gray-900">{googleFitData.nutrition.calories ?? '--'}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500">Protein</p>
+                  <p className="font-semibold text-gray-900">{googleFitData.nutrition.protein ?? '--'} g</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500">Carbs</p>
+                  <p className="font-semibold text-gray-900">{googleFitData.nutrition.carbs ?? '--'} g</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      
       <Card className={`border-l-4 ${isHealthy ? 'border-l-green-500' : 'border-l-orange-500'}`}>
         <CardContent className="p-6">
           <div className="text-center">
@@ -254,13 +306,15 @@ const ResultsView = ({ bmi, bmiCategory, healthStatus, onBack, onGetPlan, email,
         </CardContent>
       </Card>
 
+
+      {/* rest unchanged */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Button 
           variant="outline" 
           onClick={onBack}
           className="flex-1 sm:flex-none"
         >
-          Recalculate BMI
+          Recalculate health status
         </Button>
         
         {!isHealthy && (
@@ -304,6 +358,8 @@ const WellnessPlan = () => {
   const [bmi, setBmi] = useState(null);
   const [bmiCategory, setBmiCategory] = useState("");
   const [healthStatus, setHealthStatus] = useState("");
+  const [googleFitData, setGoogleFitData] = useState(null);
+  const [googleFitConnected, setGoogleFitConnected] = useState(false);
   
   const router = useRouter();
   const path = usePathname();
@@ -366,8 +422,75 @@ const WellnessPlan = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      // calculate BMI locally first
       calculateBMI();
-      
+
+      // Attempt to fetch Google Fit snapshot when user clicks "Calculate"
+      try {
+        const isConnected = localStorage.getItem('googleFitConnected') === 'true';
+        
+        if (isConnected) {
+          // Get tokens from localStorage (same way dashboard does it)
+          const accessToken = localStorage.getItem('googleFitAccessToken');
+          const refreshToken = localStorage.getItem('googleFitRefreshToken');
+          
+          if (!accessToken || !refreshToken) {
+            console.log('Missing Google Fit tokens');
+            setGoogleFitConnected(false);
+          } else {
+            // Call API with tokens in body (POST method like in dashboard)
+            const fitResponse = await fetch('/api/google-fit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                accessToken,
+                refreshToken
+              })
+            });
+            
+            if (fitResponse.ok) {
+              const fitResult = await fitResponse.json();
+              
+              // Check if we have valid data
+              if (fitResult && !fitResult.error) {
+                // Structure the data same way as fetchGoogleFitData does
+                const structuredData = {
+                  steps: fitResult.data?.activity?.steps || 0,
+                  calories: fitResult.data?.activity?.caloriesBurned || 0,
+                  distance: fitResult.data?.activity?.distance || 0,
+                  activeMinutes: fitResult.data?.activity?.activeMinutes || 0,
+                  heartRate: fitResult.data?.heartRate || { current: 0, average: 0 },
+                  sleep: fitResult.data?.sleep || { duration: 0, quality: 'No data', bedTime: null, wakeTime: null },
+                  sleepHistory: fitResult.data?.sleepHistory || [],
+                  fatBurning: fitResult.data?.body?.bodyFat || 0,
+                  lastUpdated: fitResult.data?.lastUpdated || new Date().toISOString()
+                };
+                
+                setGoogleFitData(structuredData);
+                setGoogleFitConnected(true);
+                console.log('Google Fit data fetched:', structuredData);
+              } else {
+                setGoogleFitConnected(false);
+                console.log('No valid Google Fit data:', fitResult);
+              }
+            } else {
+              const errorText = await fitResponse.text();
+              console.log('Google Fit API call failed:', fitResponse.status, errorText);
+              setGoogleFitConnected(false);
+            }
+          }
+        } else {
+          setGoogleFitConnected(false);
+          console.log('Google Fit not connected');
+        }
+      } catch (fitErr) {
+        console.error('Google Fit fetch error:', fitErr);
+        setGoogleFitConnected(false);
+      }
+
+      // existing health prediction call
       const response = await fetch("/api/health", {
         method: "POST",
         headers: {
@@ -428,6 +551,7 @@ const WellnessPlan = () => {
                   onBack={handleBack}
                   email={email}
                   router={router}
+                  googleFitData={googleFitData}    // <-- pass it down
                 />
               )}
             </div>
