@@ -13,7 +13,6 @@ const SIDEBAR_OPTIONS = [
   { name: "Dashboard", path: "", icon: "/dashboard.png" },
   { name: "Diet Plan", path: "/plan", icon: "/diet.png" },
   { name: "Nutritioner and Coaches", path: "/coaches", icon: "/coach.png" },
-  { name: "Community", path: "/community", icon: "/community.png" },
   { name: "Workout Plans", path: "/workout", icon: "/workout.png" },
   { name: "Workout Session", path: "/session", icon: "/workout.png", isLive: true },
   { name: "Wellness Checker", path: "/wellnessplan", icon: "/bmi.png" },

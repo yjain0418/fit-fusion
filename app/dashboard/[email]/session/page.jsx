@@ -527,14 +527,6 @@ const WorkoutSessionPage = () => {
             <p className="text-gray-600">
               Start live sessions, create custom workouts, and track your progress
             </p>
-            {/* Debug info - remove in production */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div className="text-sm text-yellow-800">
-                  <strong>Debug Info:</strong> User Email: {email}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* FIXED: Main Content Tabs with key prop to force re-render */}

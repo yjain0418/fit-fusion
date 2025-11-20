@@ -581,17 +581,6 @@ const WorkoutSession = ({ userId, selectedWorkout = null, onWorkoutComplete, onC
 
   return (
     <div className="space-y-6">
-      {/* Debug info - remove in production */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardContent className="p-4">
-            <div className="text-sm text-yellow-800">
-              <strong>Debug Info:</strong> User Email: {userEmail} | Session ID: {sessionId || 'None'}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Workout Header */}
       <Card>
         <CardHeader>
