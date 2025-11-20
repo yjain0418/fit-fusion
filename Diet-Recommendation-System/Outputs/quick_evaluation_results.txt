@@ -1,0 +1,38 @@
+Diet Recommendation Model - Quick Evaluation Results
+============================================================
+
+Dataset Size: 375703 recipes
+Overall Accuracy: 72.66%
+Diversity Score: 100.00%
+Model Grade: C (Fair)
+
+Detailed Results by Test Case:
+------------------------------------------------------------
+
+Weight Loss (Low Calorie):
+  Accuracy: 90.59%
+  Calorie Error: 10.03%
+  Protein Error: 14.36%
+  Carbs Error: 1.13%
+  Fat Error: 12.14%
+
+Maintenance (Balanced):
+  Accuracy: 76.34%
+  Calorie Error: 15.10%
+  Protein Error: 38.10%
+  Carbs Error: 1.25%
+  Fat Error: 40.20%
+
+Weight Gain (High Calorie):
+  Accuracy: 62.19%
+  Calorie Error: 27.91%
+  Protein Error: 51.82%
+  Carbs Error: 23.22%
+  Fat Error: 48.27%
+
+Low Carb Diet:
+  Accuracy: 61.53%
+  Calorie Error: 34.06%
+  Protein Error: 46.01%
+  Carbs Error: 33.84%
+  Fat Error: 39.95%
