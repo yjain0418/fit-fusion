@@ -1,0 +1,67 @@
+======================================================================
+ADVANCED DIET RECOMMENDATION MODEL EVALUATION REPORT
+======================================================================
+
+Dataset Size: 375703 recipes
+Training Split: 70%
+Test Split: 30%
+Features Used: 9
+
+======================================================================
+TRAINING METRICS (Final Epoch)
+======================================================================
+Final Train Distance: 0.4698
+Final Test Distance: 0.5126
+Final Train Accuracy: 76.51%
+Final Test Accuracy: 74.37%
+
+======================================================================
+REGRESSION METRICS BY NUTRIENT
+======================================================================
+
+Calories:
+  Mean Absolute Error (MAE): 156.37
+  Root Mean Squared Error (RMSE): 214.35
+  R² Score: -0.0805
+  Mean Squared Error (MSE): 45946.36
+
+Protein:
+  Mean Absolute Error (MAE): 10.56
+  Root Mean Squared Error (RMSE): 14.04
+  R² Score: -0.1332
+  Mean Squared Error (MSE): 197.20
+
+Carbs:
+  Mean Absolute Error (MAE): 19.89
+  Root Mean Squared Error (RMSE): 30.57
+  R² Score: -0.0483
+  Mean Squared Error (MSE): 934.42
+
+Fat:
+  Mean Absolute Error (MAE): 8.57
+  Root Mean Squared Error (RMSE): 11.37
+  R² Score: -0.1071
+  Mean Squared Error (MSE): 129.38
+
+======================================================================
+CONFUSION MATRIX (Calorie Categories)
+======================================================================
+Categories: Low (<300 cal), Medium (300-600 cal), High (>600 cal)
+
+                 Predicted
+              Low  Medium  High
+Actual Low      493    183      0
+       Medium   207     61      0
+       High      37     19      0
+
+Categorical Accuracy: 55.40%
+
+======================================================================
+OVERALL MODEL ASSESSMENT
+======================================================================
+Average R² Score: -0.0923
+Average MAE: 48.85
+Categorical Accuracy: 55.40%
+Test Accuracy: 74.37%
+
+Model Grade: D (Needs Improvement)
